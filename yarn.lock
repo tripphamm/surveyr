@@ -5997,7 +5997,7 @@ jest-environment-node@^23.4.0:
     jest-mock "^23.2.0"
     jest-util "^23.4.0"
 
-jest-get-type@^22.1.0:
+jest-get-type@^22.1.0, jest-get-type@^22.4.3:
   version "22.4.3"
   resolved "https://registry.yarnpkg.com/jest-get-type/-/jest-get-type-22.4.3.tgz#e3a8504d8479342dd4420236b322869f18900ce4"
   integrity sha512-/jsz0Y+V29w1chdXVygEKSz2nBoHoYqNShPe+QgxSNjAuP1i8+k4LbQNrfoliKej0P45sivkSCh7yiD6ubHS3w==
@@ -8785,6 +8785,13 @@ react-dev-utils@^8.0.0:
     sockjs-client "1.3.0"
     strip-ansi "5.0.0"
     text-table "0.2.0"
+
+react-div-100vh@^0.3.2:
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/react-div-100vh/-/react-div-100vh-0.3.2.tgz#4fb24b0b3e04a0a061e278de0209f80424afdcca"
+  integrity sha512-uXJzfYIitYtxlot+YiqQ/zp3mVuS2L/xf6xZG0EYAnZ8L+Xu1VAslxqORzIJc13aC6QNm2gtp7Jt/Iu0vVJK+Q==
+  dependencies:
+    jest-get-type "^22.4.3"
 
 react-dom@^16.8.4:
   version "16.8.4"

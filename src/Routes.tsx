@@ -4,7 +4,7 @@ import { useMappedState } from 'redux-react-hook';
 
 import useRouter from './hooks/useRouter';
 import { State } from './state/state';
-import HostOrParticipant from './pages/HostOrParticipant';
+import Join from './pages/Join';
 
 export default function Routes() {
   const mapState = useCallback((s: State) => {
@@ -21,14 +21,14 @@ export default function Routes() {
   if (!userId) {
     return (
       <Switch>
-        <Route path="*" component={HostOrParticipant} />
+        <Route path="*" component={Join} />
       </Switch>
     );
   }
 
   return (
     <Switch>
-      <Route exact path="/" component={HostOrParticipant} />
+      <Route exact path="/" component={Join} />
     </Switch>
   );
 }
