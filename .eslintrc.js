@@ -26,5 +26,7 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     // do not require marking class members as 'public' or 'private'
     '@typescript-eslint/explicit-member-accessibility': 'off',
+    // allow non-null assertion, but we should always comment our assumptions when we use it
+    '@typescript-eslint/no-non-null-assertion': 'off',
   },
 };
