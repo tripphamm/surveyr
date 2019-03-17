@@ -4,8 +4,10 @@ import { useMappedState } from 'redux-react-hook';
 
 import useRouter from './hooks/useRouter';
 import { State } from './state/state';
-import Join from './pages/Join';
-import SurveyQuestion from './pages/SurveyQuestion';
+import Join from './pages/participant/Join';
+import SurveyQuestion from './pages/participant/SurveyQuestion';
+import HostHome from './pages/host/HostHome';
+import Home from './pages/Home';
 
 export default function Routes() {
   const mapState = useCallback((s: State) => {
@@ -13,7 +15,6 @@ export default function Routes() {
       userId: s.userId.value,
       userIdError: s.userId.errorCode,
       surveyInstance: s.surveyInstance.value,
-      surveyInstanceError: s.surveyInstance.errorCode,
     };
   }, []);
 
@@ -21,17 +22,11 @@ export default function Routes() {
 
   const { userId, surveyInstance } = useMappedState(mapState);
 
-  if (surveyInstance) {
-    return (
-      <Switch>
-        <Route path="*" component={SurveyQuestion} />
-      </Switch>
-    );
-  }
-
   return (
     <Switch>
-      <Route exact path="*" component={Join} />
+      <Route exact path="/" component={Home} />
+      <Route path="/participant" component={surveyInstance ? SurveyQuestion : Join} />
+      <Route path="/host" component={HostHome} />
     </Switch>
   );
 }

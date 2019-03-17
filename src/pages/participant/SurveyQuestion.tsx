@@ -7,15 +7,17 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Icon,
 } from '@material-ui/core';
 import { useDispatch, useMappedState } from 'redux-react-hook';
+import { Clear } from '@material-ui/icons';
 
-import Shell from '../components/Shell';
-import EmojiIcon from '../components/EmojiIcon';
-import useRouter from '../hooks/useRouter';
-import { getSurvey, submitAnswer } from '../state/actions';
-import { State, SurveyInstance } from '../state/state';
-import Loading from '../components/Loading';
+import Shell from '../../components/Shell';
+import EmojiIcon from '../../components/EmojiIcon';
+import useRouter from '../../hooks/useRouter';
+import { getSurvey, leaveSurvey, submitAnswer } from '../../state/actions';
+import { State, SurveyInstance } from '../../state/state';
+import Loading from '../../components/Loading';
 
 const mapState = (s: State) => {
   return {
@@ -54,8 +56,14 @@ export default function SurveyQuestion() {
 
   return (
     <Shell
-      iconElementLeft={<EmojiIcon emojiShortName=":bar_chart:" size={32} />}
-      onLeftIconButtonClick={() => history.push('/')}
+      iconButtonLeftIcon={<EmojiIcon emojiShortName=":bar_chart:" size={32} />}
+      iconButtonLeftOnClick={() => history.push('/')}
+      iconButtonRightIcon={
+        <Icon>
+          <Clear />
+        </Icon>
+      }
+      iconButtonRightOnClick={() => dispatch(leaveSurvey())}
       bottomBarComponent={
         <Button
           style={{ height: '100%', width: '100%' }}

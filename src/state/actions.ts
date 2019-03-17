@@ -1,6 +1,7 @@
 import { Dispatch } from 'redux';
 import { auth, firestore } from '../services/firebaseService';
 import { SurveyInstance, Survey, Question, Answer, State } from './state';
+import ErrorCode from '../settings/ErrorCode';
 
 export enum ActionType {
   SET_USER_SUCCESS = 'SET_USER_SUCCESS',
@@ -11,6 +12,8 @@ export enum ActionType {
   SET_SURVEY_INSTANCE_FAILURE = 'SET_SURVEY_INSTANCE_FAILURE',
   CLEAR_SET_SURVEY_INSTANCE_ERROR = 'CLEAR_SET_SURVEY_INSTANCE_ERROR',
 
+  LEAVE_SURVEY = 'LEAVE_SURVEY',
+
   SET_SURVEY_SUCCESS = 'SET_SURVEY_SUCCESS',
   SET_SURVEY_FAILURE = 'SET_SURVEY_FAILURE',
   CLEAR_SET_SURVEY_ERROR = 'CLEAR_SET_SURVEY_ERROR',
@@ -19,20 +22,6 @@ export enum ActionType {
   SUBMIT_ANSWER_FAILURE = 'SUBMIT_ANSWER_FAILURE',
   CLEAR_SUBMIT_ANSWER_ERROR = 'CLEAR_SUBMIT_ANSWER_ERROR',
 }
-
-export type Action =
-  | SetUserSuccessAction
-  | SetUserFailureAction
-  | ClearSetUserErrorAction
-  | SetSurveyInstanceSuccessAction
-  | SetSurveyInstanceFailureAction
-  | ClearSetSurveyInstanceErrorAction
-  | SetSurveySuccessAction
-  | SetSurveyFailureAction
-  | ClearSetSurveyErrorAction
-  | SubmitAnswerSuccessAction
-  | SubmitAnswerFailureAction
-  | ClearSubmitAnswerErrorAction;
 
 interface SetUserSuccessAction {
   type: ActionType.SET_USER_SUCCESS;
@@ -92,6 +81,25 @@ interface ClearSubmitAnswerErrorAction {
   type: ActionType.CLEAR_SUBMIT_ANSWER_ERROR;
   questionId: string;
 }
+
+interface LeaveSurveyAction {
+  type: ActionType.LEAVE_SURVEY;
+}
+
+export type Action =
+  | SetUserSuccessAction
+  | SetUserFailureAction
+  | ClearSetUserErrorAction
+  | SetSurveyInstanceSuccessAction
+  | SetSurveyInstanceFailureAction
+  | ClearSetSurveyInstanceErrorAction
+  | SetSurveySuccessAction
+  | SetSurveyFailureAction
+  | ClearSetSurveyErrorAction
+  | LeaveSurveyAction
+  | SubmitAnswerSuccessAction
+  | SubmitAnswerFailureAction
+  | ClearSubmitAnswerErrorAction;
 
 export function createSetUserSuccessAction(userId: string): SetUserSuccessAction {
   return {
@@ -157,6 +165,12 @@ export function createClearSetSurveyErrorAction(): ClearSetSurveyErrorAction {
   };
 }
 
+export function createLeaveSurveyAction(): LeaveSurveyAction {
+  return {
+    type: ActionType.LEAVE_SURVEY,
+  };
+}
+
 export function createSubmitAnswerSuccessAction(
   questionId: string,
   answerId: string,
@@ -196,7 +210,7 @@ export function logInParticipant() {
       const participant = await auth.signInAnonymously();
 
       if (participant.user === null) {
-        throw 'ANONYMOUS_USER_NULL';
+        throw ErrorCode.ANONYMOUS_USER_NULL;
       }
 
       dispatch(createSetUserSuccessAction(participant.user.uid));
@@ -206,20 +220,22 @@ export function logInParticipant() {
   };
 }
 
+let unsubscribeFromSurveyInstance: (() => void) | undefined;
 export function joinSurvey(code: string) {
   return (dispatch: Dispatch) => {
     try {
-      firestore
+      // subscribe function returns unsubscribe
+      unsubscribeFromSurveyInstance = firestore
         .collection('survey-instances')
         .where('shareCode', '==', code)
         .onSnapshot(surveySnapshot => {
           try {
             if (surveySnapshot.size === 0) {
-              throw 'SURVEY_INSTANCE_NOT_FOUND';
+              throw ErrorCode.SURVEY_INSTANCE_NOT_FOUND;
             }
 
             if (surveySnapshot.size > 1) {
-              throw 'MULTIPLE_SURVEY_INSTANCES_FOUND';
+              throw ErrorCode.MULTIPLE_SURVEY_INSTANCES_FOUND;
             }
 
             const surveyInstance = surveySnapshot.docs[0].data() as SurveyInstance;
@@ -236,6 +252,17 @@ export function joinSurvey(code: string) {
   };
 }
 
+export function leaveSurvey() {
+  return (dispatch: Dispatch) => {
+    if (typeof unsubscribeFromSurveyInstance === 'function') {
+      unsubscribeFromSurveyInstance();
+      unsubscribeFromSurveyInstance = undefined;
+    }
+
+    dispatch(createLeaveSurveyAction());
+  };
+}
+
 export function getSurvey(surveyId: string) {
   return async (dispatch: Dispatch) => {
     try {
@@ -245,7 +272,7 @@ export function getSurvey(surveyId: string) {
         .get();
 
       if (!surveySnapshot.exists) {
-        throw 'SURVEY_DOES_NOT_EXIST';
+        throw ErrorCode.SURVEY_DOES_NOT_EXIST;
       }
 
       const questionsSnapshots = await surveySnapshot.ref.collection('questions').get();
@@ -291,7 +318,7 @@ export function submitAnswer(surveyInstanceId: string, questionId: string, answe
       const { userId } = stateSnapshot;
 
       if (userId.value === undefined) {
-        throw 'NO_USER';
+        throw ErrorCode.NO_PARTICIPANT_USER;
       }
 
       await firestore

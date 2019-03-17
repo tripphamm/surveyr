@@ -97,6 +97,12 @@ export const reducer = (state: State = initialState, action: Action): State => {
         ...state,
         survey: { ...state.survey, errorCode: undefined },
       };
+    case ActionType.LEAVE_SURVEY:
+      return {
+        ...state,
+        surveyInstance: { loading: false, errorCode: undefined, value: undefined },
+        survey: { loading: false, errorCode: undefined, value: undefined },
+      };
     case ActionType.SUBMIT_ANSWER_SUCCESS:
       return {
         ...state,
