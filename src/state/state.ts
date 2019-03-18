@@ -6,6 +6,12 @@ export interface Loadable<T> {
   value?: T;
 }
 
+export interface User {
+  id: string;
+  isAnonymous: boolean;
+  displayName: string | null;
+}
+
 export interface SurveyInstance {
   id: string;
   shareCode: string;
@@ -35,7 +41,7 @@ export interface Answer {
 }
 
 export interface State {
-  userId: Loadable<string>;
+  user: Loadable<User | null>;
   surveyInstance: Loadable<SurveyInstance>;
   survey: Loadable<Survey>;
   participantAnswers: { [questionId: string]: string };
@@ -43,7 +49,7 @@ export interface State {
 }
 
 export const initialState: State = {
-  userId: { loading: true },
+  user: { loading: true },
   surveyInstance: { loading: false },
   survey: { loading: false },
   participantAnswers: {},
@@ -55,17 +61,17 @@ export const reducer = (state: State = initialState, action: Action): State => {
     case ActionType.SET_USER_SUCCESS:
       return {
         ...state,
-        userId: { loading: false, errorCode: undefined, value: action.userId },
+        user: { loading: false, errorCode: undefined, value: action.user },
       };
     case ActionType.SET_USER_FAILURE:
       return {
         ...state,
-        userId: { loading: false, errorCode: action.error, value: undefined },
+        user: { loading: false, errorCode: action.error, value: undefined },
       };
     case ActionType.CLEAR_SET_USER_ERROR:
       return {
         ...state,
-        userId: { ...state.userId, errorCode: undefined },
+        user: { ...state.user, errorCode: undefined },
       };
     case ActionType.SET_SURVEY_INSTANCE_SUCCESS:
       return {

@@ -1,6 +1,7 @@
-import app from '@firebase/app';
-import '@firebase/firestore';
-import '@firebase/auth';
+import firebase from 'firebase/app';
+import 'firebase/firestore';
+import 'firebase/auth';
+import firebaseui from 'firebaseui';
 
 const config = {
   apiKey: 'AIzaSyD1Yyk72-U54xD2t9YqZT-q7OpBGU3-V3g',
@@ -11,16 +12,37 @@ const config = {
   messagingSenderId: '1006850725025',
 };
 
-app.initializeApp(config);
+firebase.initializeApp(config);
 
-if (app.firestore === undefined) {
+if (firebase.firestore === undefined) {
   throw new Error('Firebase Firestore library was not loaded');
 }
 
-export const firestore = app.firestore();
+export const firestore = firebase.firestore();
 
-if (app.auth === undefined) {
+if (firebase.auth === undefined) {
   throw new Error('Firebase Auth library was not loaded');
 }
 
-export const auth = app.auth();
+export const auth = firebase.auth();
+
+// FirebaseUI config.
+export function getUIConfig(options: { returnURL?: string } = {}) {
+  const { returnURL = '/' } = options;
+
+  const signInOptions = [
+    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+    firebase.auth.EmailAuthProvider.PROVIDER_ID,
+  ];
+
+  return {
+    signInSuccessUrl: returnURL,
+    signInOptions,
+    // Terms of service url/callback.
+    tosUrl: '/tos',
+    // Privacy policy url/callback.
+    privacyPolicyUrl: '/privacy',
+  };
+}
+
+export const ui = new firebaseui.auth.AuthUI(firebase.auth());

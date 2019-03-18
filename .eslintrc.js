@@ -14,12 +14,15 @@ module.exports = {
   ],
   plugins: [
     'react',
+    'react-hooks',
     // accessibility linting for jsx
     'jsx-a11y',
     // better linting for ES6 import statements
     'import',
   ],
   rules: {
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn',
     // this falsely reports imports as unused; disabling for now
     '@typescript-eslint/no-unused-vars': 'off',
     // allow typescript to infer return type of function

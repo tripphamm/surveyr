@@ -10,20 +10,20 @@ import EmojiIcon from './EmojiIcon';
 
 type ShellProps = React.HTMLProps<HTMLDivElement> & {
   title?: string;
-  iconButtonLeftIcon?: React.ReactNode;
-  iconButtonLeftOnClick?: () => void;
-  iconButtonRightIcon?: React.ReactNode;
-  iconButtonRightOnClick?: () => void;
+  buttonLeftComponent?: React.ReactNode;
+  buttonRightComponent?: React.ReactNode;
   bottomBarComponent?: React.ReactNode;
 };
 
 export default function Shell(props: ShellProps) {
   const {
     title = 'Surveyr',
-    iconButtonLeftIcon = <EmojiIcon emojiShortName=":bar_chart:" size={32} />,
-    iconButtonLeftOnClick,
-    iconButtonRightIcon,
-    iconButtonRightOnClick,
+    buttonLeftComponent = (
+      <IconButton color="inherit">
+        <EmojiIcon emojiShortName=":bar_chart:" size={32} />
+      </IconButton>
+    ),
+    buttonRightComponent,
     bottomBarComponent,
     children,
   } = props;
@@ -38,21 +38,12 @@ export default function Shell(props: ShellProps) {
     >
       <AppBar position="static">
         <Toolbar>
-          {iconButtonLeftIcon && (
-            <IconButton color="inherit" onClick={iconButtonLeftOnClick}>
-              {iconButtonLeftIcon}
-            </IconButton>
-          )}
-
+          {buttonLeftComponent}
           {/* flexGrow is required to push the right IconButton to the right side */}
           <Typography variant="h6" color="inherit" style={{ flexGrow: 1 }}>
             {title}
           </Typography>
-          {iconButtonRightIcon && (
-            <IconButton color="inherit" onClick={iconButtonRightOnClick}>
-              {iconButtonRightIcon}
-            </IconButton>
-          )}
+          {buttonRightComponent}
         </Toolbar>
       </AppBar>
       <div

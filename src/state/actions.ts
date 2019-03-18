@@ -1,6 +1,6 @@
 import { Dispatch } from 'redux';
 import { auth, firestore } from '../services/firebaseService';
-import { SurveyInstance, Survey, Question, Answer, State } from './state';
+import { SurveyInstance, Survey, Question, Answer, State, User } from './state';
 import ErrorCode from '../settings/ErrorCode';
 
 export enum ActionType {
@@ -25,7 +25,7 @@ export enum ActionType {
 
 interface SetUserSuccessAction {
   type: ActionType.SET_USER_SUCCESS;
-  userId: string;
+  user: User | null;
 }
 
 interface SetUserFailureAction {
@@ -101,10 +101,10 @@ export type Action =
   | SubmitAnswerFailureAction
   | ClearSubmitAnswerErrorAction;
 
-export function createSetUserSuccessAction(userId: string): SetUserSuccessAction {
+export function createSetUserSuccessAction(user: User | null): SetUserSuccessAction {
   return {
     type: ActionType.SET_USER_SUCCESS,
-    userId,
+    user,
   };
 }
 
@@ -204,22 +204,6 @@ export function createClearSubmitAnswerErrorAction(
 
 // async
 
-export function logInParticipant() {
-  return async (dispatch: Dispatch) => {
-    try {
-      const participant = await auth.signInAnonymously();
-
-      if (participant.user === null) {
-        throw ErrorCode.ANONYMOUS_USER_NULL;
-      }
-
-      dispatch(createSetUserSuccessAction(participant.user.uid));
-    } catch (error) {
-      dispatch(createSetUserFailureAction(error));
-    }
-  };
-}
-
 let unsubscribeFromSurveyInstance: (() => void) | undefined;
 export function joinSurvey(code: string) {
   return (dispatch: Dispatch) => {
@@ -315,17 +299,17 @@ export function submitAnswer(surveyInstanceId: string, questionId: string, answe
   return async (dispatch: Dispatch, getState: () => State) => {
     try {
       const stateSnapshot = getState();
-      const { userId } = stateSnapshot;
+      const { user } = stateSnapshot;
 
-      if (userId.value === undefined) {
-        throw ErrorCode.NO_PARTICIPANT_USER;
+      if (user.value === undefined || user.value === null) {
+        throw ErrorCode.NO_USER;
       }
 
       await firestore
         .collection('participant-answers')
         .doc(surveyInstanceId)
         .collection('participants')
-        .doc(userId.value)
+        .doc(user.value.id)
         .collection('questions')
         .doc(questionId)
         .set({

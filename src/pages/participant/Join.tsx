@@ -7,20 +7,26 @@ import {
   InputLabel,
   OutlinedInput,
   FormHelperText,
+  Icon,
+  IconButton,
 } from '@material-ui/core';
+import ExitToApp from '@material-ui/icons/ExitToApp';
 import { Link } from 'react-router-dom';
 import { useDispatch, useMappedState } from 'redux-react-hook';
 
 import Shell from '../../components/Shell';
 import EmojiIcon from '../../components/EmojiIcon';
 import useRouter from '../../hooks/useRouter';
-import { logInParticipant, joinSurvey } from '../../state/actions';
+import { joinSurvey } from '../../state/actions';
 import { State } from '../../state/state';
 import { surveyCodeLabelWidth } from '../../settings/magicNumbers';
 import ErrorCode from '../../settings/ErrorCode';
+import { auth } from '../../services/firebaseService';
+import Loading from '../../components/Loading';
 
 const mapState = (s: State) => {
   return {
+    user: s.user.value,
     surveyInstanceErrorCode: s.surveyInstance.errorCode,
   };
 };
@@ -42,16 +48,25 @@ export default function Join() {
   const [surveyCode, setSurveyCode] = useState(code || '');
   const { history } = useRouter();
   const dispatch = useDispatch();
-  const { surveyInstanceErrorCode } = useMappedState(mapState);
+  const { user, surveyInstanceErrorCode } = useMappedState(mapState);
   const surveyCodeLabelRef = useRef<InputLabel | null>(null);
   const surveyCodeLabelElementRef = ReactDOM.findDOMNode(
     surveyCodeLabelRef.current,
   ) as HTMLLabelElement;
 
+  // if user is not signed in, sign them in to an anonymous account to reduce first-time use friction
+  if (user === null) {
+    auth.signInAnonymously();
+    return <Loading />;
+  }
+
   return (
     <Shell
-      iconButtonLeftIcon={<EmojiIcon emojiShortName=":bar_chart:" size={32} />}
-      iconButtonLeftOnClick={() => history.push('/')}
+      buttonLeftComponent={
+        <IconButton onClick={() => history.push('/')}>
+          <EmojiIcon emojiShortName=":bar_chart:" size={32} />
+        </IconButton>
+      }
       bottomBarComponent={
         <Button
           style={{ height: '100%', width: '100%' }}
@@ -59,7 +74,6 @@ export default function Join() {
           color="primary"
           disabled={surveyCode.length === 0}
           onClick={async () => {
-            await dispatch(logInParticipant());
             await dispatch(joinSurvey(surveyCode));
           }}
         >

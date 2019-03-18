@@ -8,6 +8,7 @@ import {
   FormControlLabel,
   Radio,
   Icon,
+  IconButton,
 } from '@material-ui/core';
 import { useDispatch, useMappedState } from 'redux-react-hook';
 import { Clear } from '@material-ui/icons';
@@ -56,14 +57,18 @@ export default function SurveyQuestion() {
 
   return (
     <Shell
-      iconButtonLeftIcon={<EmojiIcon emojiShortName=":bar_chart:" size={32} />}
-      iconButtonLeftOnClick={() => history.push('/')}
-      iconButtonRightIcon={
-        <Icon>
-          <Clear />
-        </Icon>
+      buttonLeftComponent={
+        <IconButton onClick={() => history.push('/')}>
+          <EmojiIcon emojiShortName=":bar_chart:" size={32} />
+        </IconButton>
       }
-      iconButtonRightOnClick={() => dispatch(leaveSurvey())}
+      buttonRightComponent={
+        <IconButton color="inherit" onClick={() => dispatch(leaveSurvey())}>
+          <Icon>
+            <Clear />
+          </Icon>
+        </IconButton>
+      }
       bottomBarComponent={
         <Button
           style={{ height: '100%', width: '100%' }}
