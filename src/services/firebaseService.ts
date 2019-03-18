@@ -26,21 +26,15 @@ if (firebase.auth === undefined) {
 
 export const auth = firebase.auth();
 
-// FirebaseUI config.
-export function getUIConfig(options: { returnURL?: string } = {}) {
-  const { returnURL = '/' } = options;
-
+export function getUIConfig() {
   const signInOptions = [
     firebase.auth.GoogleAuthProvider.PROVIDER_ID,
     firebase.auth.EmailAuthProvider.PROVIDER_ID,
   ];
 
   return {
-    signInSuccessUrl: returnURL,
     signInOptions,
-    // Terms of service url/callback.
     tosUrl: '/tos',
-    // Privacy policy url/callback.
     privacyPolicyUrl: '/privacy',
   };
 }

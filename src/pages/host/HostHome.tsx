@@ -25,8 +25,8 @@ export default function HostHome() {
     throw new Error('User is undefined in Host component');
   }
 
-  if (user === null || (location.pathname.startsWith('/host') && user.isAnonymous)) {
-    return <Auth returnURL="/host" />;
+  if (user === null || user.isAnonymous) {
+    return <Auth />;
   }
 
   return (
