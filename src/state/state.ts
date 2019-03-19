@@ -58,10 +58,15 @@ export interface NormalizedSurvey {
   questions: { [questionId: string]: NormalizedQuestion };
 }
 
+export interface NormalizedSurveys {
+  [surveyId: string]: NormalizedSurvey;
+}
+
 export interface State {
   user: Loadable<User | null>;
   surveyInstance: Loadable<SurveyInstance>;
-  survey: Loadable<NormalizedSurvey>;
+  activeSurvey: Loadable<NormalizedSurvey>;
+  mySurveys: Loadable<NormalizedSurveys>;
   participantAnswers: { [questionId: string]: string };
   participantAnswerErrors: { [questionId: string]: string | null };
 }
@@ -69,7 +74,8 @@ export interface State {
 export const initialState: State = {
   user: { loading: true },
   surveyInstance: { loading: false },
-  survey: { loading: false },
+  activeSurvey: { loading: false },
+  mySurveys: { loading: false },
   participantAnswers: {},
   participantAnswerErrors: {},
 };
@@ -106,26 +112,26 @@ export const reducer = (state: State = initialState, action: Action): State => {
         ...state,
         surveyInstance: { ...state.surveyInstance, errorCode: undefined },
       };
-    case ActionType.SET_SURVEY_SUCCESS:
+    case ActionType.SET_ACTIVE_SURVEY_SUCCESS:
       return {
         ...state,
-        survey: { loading: false, errorCode: undefined, value: action.survey },
+        activeSurvey: { loading: false, errorCode: undefined, value: action.activeSurvey },
       };
-    case ActionType.SET_SURVEY_FAILURE:
+    case ActionType.SET_ACTIVE_SURVEY_FAILURE:
       return {
         ...state,
-        survey: { loading: false, errorCode: action.error, value: undefined },
+        activeSurvey: { loading: false, errorCode: action.error, value: undefined },
       };
-    case ActionType.CLEAR_SET_SURVEY_ERROR:
+    case ActionType.CLEAR_SET_ACTIVE_SURVEY_ERROR:
       return {
         ...state,
-        survey: { ...state.survey, errorCode: undefined },
+        activeSurvey: { ...state.activeSurvey, errorCode: undefined },
       };
     case ActionType.LEAVE_SURVEY:
       return {
         ...state,
         surveyInstance: { loading: false, errorCode: undefined, value: undefined },
-        survey: { loading: false, errorCode: undefined, value: undefined },
+        activeSurvey: { loading: false, errorCode: undefined, value: undefined },
       };
     case ActionType.SUBMIT_ANSWER_SUCCESS:
       return {
@@ -150,6 +156,26 @@ export const reducer = (state: State = initialState, action: Action): State => {
           ...state.participantAnswerErrors,
           [action.questionId]: null,
         },
+      };
+    case ActionType.SET_MY_SURVEYS_SUCCESS:
+      return {
+        ...state,
+        mySurveys: { loading: false, errorCode: undefined, value: action.mySurveys },
+      };
+    case ActionType.SET_MY_SURVEYS_FAILURE:
+      return {
+        ...state,
+        mySurveys: { loading: false, errorCode: action.error, value: undefined },
+      };
+    case ActionType.CLEAR_SET_MY_SURVEYS_ERROR:
+      return {
+        ...state,
+        mySurveys: { ...state.mySurveys, errorCode: undefined },
+      };
+    case ActionType.CLEAR_MY_SURVEYS:
+      return {
+        ...state,
+        mySurveys: { loading: false, errorCode: undefined, value: undefined },
       };
     default:
       return state;

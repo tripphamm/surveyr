@@ -24,9 +24,9 @@ const mapState = (s: State) => {
   return {
     // assume surveyInstance is defined since we won't render this component unless that's the case
     surveyInstance: s.surveyInstance.value as SurveyInstance,
-    survey: s.survey.value,
-    surveyLoading: s.survey.loading,
-    surveyError: s.survey.errorCode,
+    activeSurvey: s.activeSurvey.value,
+    activeSurveyLoading: s.activeSurvey.loading,
+    activeSurveyError: s.activeSurvey.errorCode,
     participantAnswers: s.participantAnswers,
   };
 };
@@ -37,17 +37,17 @@ export default function SurveyQuestion() {
   const [answerId, setAnswerId] = useState<string | undefined>(undefined);
   const { history } = useRouter();
   const dispatch = useDispatch();
-  const { participantAnswers, surveyInstance, survey } = useMappedState(mapState);
+  const { participantAnswers, surveyInstance, activeSurvey } = useMappedState(mapState);
 
   useEffect(() => {
     dispatch(getSurvey(surveyInstance.surveyId));
   }, [surveyInstance.surveyId]);
 
-  if (survey === undefined) {
+  if (activeSurvey === undefined) {
     return <Loading />;
   }
 
-  const currentQuestion = survey.questions[surveyInstance.currentQuestionId];
+  const currentQuestion = activeSurvey.questions[surveyInstance.currentQuestionId];
 
   if (currentQuestion === undefined) {
     throw new Error("Current question doesn't exist in the survey");

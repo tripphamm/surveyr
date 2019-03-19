@@ -9,6 +9,8 @@ import {
   UnsavedSurvey,
   NormalizedQuestion,
   NormalizedSurvey,
+  Loadable,
+  NormalizedSurveys,
 } from './state';
 import ErrorCode from '../settings/ErrorCode';
 
@@ -23,9 +25,13 @@ export enum ActionType {
 
   LEAVE_SURVEY = 'LEAVE_SURVEY',
 
-  SET_SURVEY_SUCCESS = 'SET_SURVEY_SUCCESS',
-  SET_SURVEY_FAILURE = 'SET_SURVEY_FAILURE',
-  CLEAR_SET_SURVEY_ERROR = 'CLEAR_SET_SURVEY_ERROR',
+  SET_ACTIVE_SURVEY_SUCCESS = 'SET_ACTIVE_SURVEY_SUCCESS',
+  SET_ACTIVE_SURVEY_FAILURE = 'SET_ACTIVE_SURVEY_FAILURE',
+  CLEAR_SET_ACTIVE_SURVEY_ERROR = 'CLEAR_SET_ACTIVE_SURVEY_ERROR',
+
+  SET_MY_SURVEYS_SUCCESS = 'SET_MY_SURVEYS_SUCCESS',
+  SET_MY_SURVEYS_FAILURE = 'SET_MY_SURVEYS_FAILURE',
+  CLEAR_SET_MY_SURVEYS_ERROR = 'CLEAR_SET_MY_SURVEYS_ERROR',
 
   SUBMIT_ANSWER_SUCCESS = 'SUBMIT_ANSWER_SUCCESS',
   SUBMIT_ANSWER_FAILURE = 'SUBMIT_ANSWER_FAILURE',
@@ -33,6 +39,8 @@ export enum ActionType {
 
   SAVE_SURVEY_FAILURE = 'SAVE_SURVEY_FAILURE',
   CLEAR_SAVE_SURVEY_ERROR = 'CLEAR_SAVE_SURVEY_ERROR',
+
+  CLEAR_MY_SURVEYS = 'CLEAR_MY_SURVEYS',
 }
 
 export type Action =
@@ -42,15 +50,19 @@ export type Action =
   | SetSurveyInstanceSuccessAction
   | SetSurveyInstanceFailureAction
   | ClearSetSurveyInstanceErrorAction
-  | SetSurveySuccessAction
-  | SetSurveyFailureAction
-  | ClearSetSurveyErrorAction
+  | SetActiveSurveySuccessAction
+  | SetActiveSurveyFailureAction
+  | ClearSetActiveSurveyErrorAction
   | LeaveSurveyAction
   | SubmitAnswerSuccessAction
   | SubmitAnswerFailureAction
   | ClearSubmitAnswerErrorAction
   | SaveSurveyFailureAction
-  | ClearSaveSurveyErrorAction;
+  | ClearSaveSurveyErrorAction
+  | SetMySurveysSuccessAction
+  | SetMySurveysFailureAction
+  | ClearSetMySurveysErrorAction
+  | ClearMySurveysAction;
 
 interface SetUserSuccessAction {
   type: ActionType.SET_USER_SUCCESS;
@@ -118,34 +130,36 @@ export function createClearSetSurveyInstanceErrorAction(): ClearSetSurveyInstanc
   };
 }
 
-interface SetSurveySuccessAction {
-  type: ActionType.SET_SURVEY_SUCCESS;
-  survey: NormalizedSurvey;
+interface SetActiveSurveySuccessAction {
+  type: ActionType.SET_ACTIVE_SURVEY_SUCCESS;
+  activeSurvey: NormalizedSurvey;
 }
-export function createSetSurveySuccessAction(survey: NormalizedSurvey): SetSurveySuccessAction {
+export function createSetActiveSurveySuccessAction(
+  activeSurvey: NormalizedSurvey,
+): SetActiveSurveySuccessAction {
   return {
-    type: ActionType.SET_SURVEY_SUCCESS,
-    survey,
+    type: ActionType.SET_ACTIVE_SURVEY_SUCCESS,
+    activeSurvey,
   };
 }
 
-interface SetSurveyFailureAction {
-  type: ActionType.SET_SURVEY_FAILURE;
+interface SetActiveSurveyFailureAction {
+  type: ActionType.SET_ACTIVE_SURVEY_FAILURE;
   error: string;
 }
-export function createSetSurveyFailureAction(error: string): SetSurveyFailureAction {
+export function createSetActiveSurveyFailureAction(error: string): SetActiveSurveyFailureAction {
   return {
-    type: ActionType.SET_SURVEY_FAILURE,
+    type: ActionType.SET_ACTIVE_SURVEY_FAILURE,
     error,
   };
 }
 
-interface ClearSetSurveyErrorAction {
-  type: ActionType.CLEAR_SET_SURVEY_ERROR;
+interface ClearSetActiveSurveyErrorAction {
+  type: ActionType.CLEAR_SET_ACTIVE_SURVEY_ERROR;
 }
-export function createClearSetSurveyErrorAction(): ClearSetSurveyErrorAction {
+export function createClearSetActiveSurveyErrorAction(): ClearSetActiveSurveyErrorAction {
   return {
-    type: ActionType.CLEAR_SET_SURVEY_ERROR,
+    type: ActionType.CLEAR_SET_ACTIVE_SURVEY_ERROR,
   };
 }
 
@@ -223,7 +237,74 @@ export function createClearSaveSurveyErrorAction(questionId: string): ClearSaveS
   };
 }
 
+interface SetMySurveysSuccessAction {
+  type: ActionType.SET_MY_SURVEYS_SUCCESS;
+  mySurveys: NormalizedSurveys;
+}
+export function createSetMySurveysSuccessAction(
+  mySurveys: NormalizedSurveys,
+): SetMySurveysSuccessAction {
+  return {
+    type: ActionType.SET_MY_SURVEYS_SUCCESS,
+    mySurveys,
+  };
+}
+
+interface SetMySurveysFailureAction {
+  type: ActionType.SET_MY_SURVEYS_FAILURE;
+  error: string;
+}
+export function createSetMySurveysFailureAction(error: string): SetMySurveysFailureAction {
+  return {
+    type: ActionType.SET_MY_SURVEYS_FAILURE,
+    error,
+  };
+}
+
+interface ClearSetMySurveysErrorAction {
+  type: ActionType.CLEAR_SET_MY_SURVEYS_ERROR;
+}
+export function createClearSetMySurveysErrorAction(): ClearSetMySurveysErrorAction {
+  return {
+    type: ActionType.CLEAR_SET_MY_SURVEYS_ERROR,
+  };
+}
+
+interface ClearMySurveysAction {
+  type: ActionType.CLEAR_MY_SURVEYS;
+}
+export function createClearMySurveysAction(): ClearMySurveysAction {
+  return {
+    type: ActionType.CLEAR_MY_SURVEYS,
+  };
+}
+
 // async
+
+function normalizeSurvey(survey: Survey): NormalizedSurvey {
+  const normalizedQuestions = survey.questions.reduce<{
+    [questionId: string]: NormalizedQuestion;
+  }>((questions, question) => {
+    const normalizedAnswers = question.possibleAnswers.reduce<{
+      [answerId: string]: Answer;
+    }>((answers, answer) => {
+      answers[answer.id] = answer;
+      return answers;
+    }, {});
+
+    questions[question.id] = {
+      ...question,
+      possibleAnswers: normalizedAnswers,
+    };
+
+    return questions;
+  }, {});
+
+  return {
+    ...survey,
+    questions: normalizedQuestions,
+  };
+}
 
 let unsubscribeFromSurveyInstance: (() => void) | undefined;
 export function joinSurvey(code: string) {
@@ -283,32 +364,11 @@ export function getSurvey(surveyId: string) {
       const survey = surveySnapshot.data() as Survey;
       survey.id = surveySnapshot.id;
 
-      const normalizedQuestions = survey.questions.reduce<{
-        [questionId: string]: NormalizedQuestion;
-      }>((questions, question) => {
-        const normalizedAnswers = question.possibleAnswers.reduce<{
-          [answerId: string]: Answer;
-        }>((answers, answer) => {
-          answers[answer.id] = answer;
-          return answers;
-        }, {});
+      const normalizedSurvey = normalizeSurvey(survey);
 
-        questions[question.id] = {
-          ...question,
-          possibleAnswers: normalizedAnswers,
-        };
-
-        return questions;
-      }, {});
-
-      const normalizedSurvey = {
-        ...survey,
-        questions: normalizedQuestions,
-      };
-
-      dispatch(createSetSurveySuccessAction(normalizedSurvey));
+      dispatch(createSetActiveSurveySuccessAction(normalizedSurvey));
     } catch (error) {
-      dispatch(createSetSurveyFailureAction(error.toString()));
+      dispatch(createSetActiveSurveyFailureAction(error.toString()));
     }
   };
 }
@@ -362,6 +422,50 @@ export function saveSurvey(survey: UnsavedSurvey) {
       }
     } catch (error) {
       dispatch(createSaveSurveyFailureAction(error.toString()));
+    }
+  };
+}
+
+let unsubscribeFromMySurveys: (() => void) | undefined;
+export function subscribeToMySurveys() {
+  return (dispatch: Dispatch, getState: () => State) => {
+    try {
+      const stateSnapshot = getState();
+      const { user } = stateSnapshot;
+
+      if (user.value === undefined || user.value === null) {
+        throw ErrorCode.NO_USER;
+      }
+
+      // unsubscribe from any previous subscription
+      if (typeof unsubscribeFromMySurveys === 'function') {
+        unsubscribeFromMySurveys();
+        unsubscribeFromMySurveys = undefined;
+      }
+
+      // subscribe function returns unsubscribe
+      unsubscribeFromMySurveys = firestore
+        .collection('surveys')
+        .where('authorId', '==', user.value.id)
+        .onSnapshot(surveysSnapshot => {
+          try {
+            const mySurveys = surveysSnapshot.docs.reduce<NormalizedSurveys>(
+              (surveys, surveyDoc) => {
+                const survey = surveyDoc.data() as Survey;
+                survey.id = surveyDoc.id;
+                surveys[surveyDoc.id] = normalizeSurvey(survey);
+                return surveys;
+              },
+              {},
+            );
+
+            dispatch(createSetMySurveysSuccessAction(mySurveys));
+          } catch (error) {
+            dispatch(createSetMySurveysFailureAction(error.toString()));
+          }
+        });
+    } catch (error) {
+      dispatch(createSetMySurveysFailureAction(error.toString()));
     }
   };
 }

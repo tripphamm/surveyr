@@ -1,15 +1,12 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Link } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { useDispatch, useMappedState } from 'redux-react-hook';
 
 import { auth } from './services/firebaseService';
 import Routes from './Routes';
-import { createSetUserSuccessAction, createSetSurveyFailureAction } from './state/actions';
+import { createSetUserSuccessAction, createSetActiveSurveyFailureAction } from './state/actions';
 import Loading from './components/Loading';
 import { State } from './state/state';
-import useRouter from './hooks/useRouter';
-import Shell from './components/Shell';
-import { Typography } from '@material-ui/core';
 
 const mapState = (state: State) => {
   return {
@@ -20,8 +17,6 @@ const mapState = (state: State) => {
 export default function App() {
   const dispatch = useDispatch();
   const { user } = useMappedState(mapState);
-
-  const { location } = window;
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -40,7 +35,7 @@ export default function App() {
           );
         }
       } catch (error) {
-        dispatch(createSetSurveyFailureAction(error.toString()));
+        dispatch(createSetActiveSurveyFailureAction(error.toString()));
       }
     });
 

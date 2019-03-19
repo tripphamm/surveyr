@@ -139,7 +139,10 @@ export default function CreateSurvey() {
           style={{ height: '100%', width: '100%' }}
           variant="contained"
           color="primary"
-          onClick={() => dispatch(saveSurvey({ title, questions }))}
+          onClick={async () => {
+            await dispatch(saveSurvey({ title, questions }));
+            history.push('/host/surveys');
+          }}
           disabled={
             // has a title,
             // has at least one question,
