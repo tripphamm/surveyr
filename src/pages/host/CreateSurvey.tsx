@@ -99,6 +99,7 @@ const reduce = (state: UnsavedSurvey, action: { type: string; payload?: any }) =
       return state;
   }
 };
+
 export default function CreateSurvey() {
   const [state, dispatchLocal] = useReducer<
     React.Reducer<UnsavedSurvey, { type: string; payload?: any }>

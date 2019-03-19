@@ -3,7 +3,6 @@ import { auth, firestore } from '../services/firebaseService';
 import {
   SurveyInstance,
   Survey,
-  Question,
   Answer,
   State,
   User,
@@ -31,6 +30,9 @@ export enum ActionType {
   SUBMIT_ANSWER_SUCCESS = 'SUBMIT_ANSWER_SUCCESS',
   SUBMIT_ANSWER_FAILURE = 'SUBMIT_ANSWER_FAILURE',
   CLEAR_SUBMIT_ANSWER_ERROR = 'CLEAR_SUBMIT_ANSWER_ERROR',
+
+  SAVE_SURVEY_FAILURE = 'SAVE_SURVEY_FAILURE',
+  CLEAR_SAVE_SURVEY_ERROR = 'CLEAR_SAVE_SURVEY_ERROR',
 }
 
 export type Action =
@@ -46,7 +48,9 @@ export type Action =
   | LeaveSurveyAction
   | SubmitAnswerSuccessAction
   | SubmitAnswerFailureAction
-  | ClearSubmitAnswerErrorAction;
+  | ClearSubmitAnswerErrorAction
+  | SaveSurveyFailureAction
+  | ClearSaveSurveyErrorAction;
 
 interface SetUserSuccessAction {
   type: ActionType.SET_USER_SUCCESS;
@@ -199,6 +203,26 @@ export function createClearSubmitAnswerErrorAction(
   };
 }
 
+interface SaveSurveyFailureAction {
+  type: ActionType.SAVE_SURVEY_FAILURE;
+  error: string;
+}
+export function createSaveSurveyFailureAction(error: string): SaveSurveyFailureAction {
+  return {
+    type: ActionType.SAVE_SURVEY_FAILURE,
+    error,
+  };
+}
+
+interface ClearSaveSurveyErrorAction {
+  type: ActionType.CLEAR_SAVE_SURVEY_ERROR;
+}
+export function createClearSaveSurveyErrorAction(questionId: string): ClearSaveSurveyErrorAction {
+  return {
+    type: ActionType.CLEAR_SAVE_SURVEY_ERROR,
+  };
+}
+
 // async
 
 let unsubscribeFromSurveyInstance: (() => void) | undefined;
@@ -336,12 +360,8 @@ export function saveSurvey(survey: UnsavedSurvey) {
         survey.authorId = user.value.id;
         await ref.add(survey);
       }
-
-      alert('saved survey');
-      // dispatch(createSaveSurveySuccessAction())
     } catch (error) {
-      console.error('failed to save survey', error);
-      // dispatch(createSaveSurveyFailureAction(error.toString()));
+      dispatch(createSaveSurveyFailureAction(error.toString()));
     }
   };
 }
