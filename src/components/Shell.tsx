@@ -28,6 +28,8 @@ export default function Shell(props: ShellProps) {
     children,
   } = props;
 
+  const bottomBarBuffer = bottomBarComponent ? bottomBarHeight : 0;
+
   return (
     <Div100vh
       style={{
@@ -50,14 +52,16 @@ export default function Shell(props: ShellProps) {
         style={{
           boxSizing: 'border-box',
           // set the size of the viewport (between the app bar and bottom nav)
-          height: `calc(100% - ${topBarHeight + bottomBarHeight}px)`,
+          height: `calc(100% - ${topBarHeight + bottomBarBuffer}px)`,
           overflow: 'auto',
           padding: 20,
         }}
       >
         {children}
       </div>
-      <div style={{ height: bottomBarHeight, overflow: 'hidden' }}>{bottomBarComponent}</div>
+      {bottomBarComponent && (
+        <div style={{ height: bottomBarHeight, overflow: 'hidden' }}>{bottomBarComponent}</div>
+      )}
     </Div100vh>
   );
 }

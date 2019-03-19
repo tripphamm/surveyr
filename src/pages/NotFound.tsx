@@ -1,11 +1,12 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { IconButton, Typography } from '@material-ui/core';
 
 import useRouter from '../hooks/useRouter';
 import Shell from '../components/Shell';
 import EmojiIcon from '../components/EmojiIcon';
 
-export default function TOS() {
+export default function NotFound() {
   const { history } = useRouter();
 
   return (
@@ -16,7 +17,8 @@ export default function TOS() {
         </IconButton>
       }
     >
-      <Typography>Privacy</Typography>
+      <Typography>Hm. There isn't anything here</Typography>
+      <Link to="/">Head home</Link>
     </Shell>
   );
 }

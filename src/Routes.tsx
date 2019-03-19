@@ -6,11 +6,11 @@ import useRouter from './hooks/useRouter';
 import { State } from './state/state';
 import Join from './pages/participant/Join';
 import SurveyQuestion from './pages/participant/SurveyQuestion';
-import HostHome from './pages/host/HostHome';
 import Home from './pages/Home';
-import Auth from './pages/Auth';
 import TOS from './pages/TOS';
 import Privacy from './pages/Privacy';
+import HostRoutes from './pages/host/HostRoutes';
+import NotFound from './pages/NotFound';
 
 const mapState = (s: State) => {
   return {
@@ -29,9 +29,10 @@ export default function Routes() {
     <Switch>
       <Route exact path="/" component={Home} />
       <Route path="/participant" component={surveyInstance ? SurveyQuestion : Join} />
-      <Route path="/host" component={HostHome} />
+      <Route path="/host" component={HostRoutes} />
       <Route path="/tos" component={TOS} />
       <Route path="/privacy" component={Privacy} />
+      <Route path="*" component={NotFound} />
     </Switch>
   );
 }

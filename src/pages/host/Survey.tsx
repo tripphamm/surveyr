@@ -1,33 +1,22 @@
 import React from 'react';
-import { Button, IconButton, Typography, Link } from '@material-ui/core';
+import { Button, IconButton, Icon } from '@material-ui/core';
 import { useMappedState } from 'redux-react-hook';
+import { Clear } from '@material-ui/icons';
 
 import Shell from '../../components/Shell';
 import useRouter from '../../hooks/useRouter';
 import { State } from '../../state/state';
 import { auth } from '../../services/firebaseService';
 import EmojiIcon from '../../components/EmojiIcon';
-import Loading from '../../components/Loading';
-import Auth from '../Auth';
 
 const mapState = (s: State) => {
-  return {
-    user: s.user.value,
-    userError: s.user.errorCode,
-  };
+  return {};
 };
 
 export default function HostHome() {
-  const { history } = useRouter();
-  const { user } = useMappedState(mapState);
-
-  if (user === undefined) {
-    throw new Error('User is undefined in Host component');
-  }
-
-  if (user === null || user.isAnonymous) {
-    return <Auth />;
-  }
+  const { history, match } = useRouter<{ surveyId: string }>();
+  const { params } = match;
+  const { surveyId } = params;
 
   return (
     <Shell
@@ -37,10 +26,14 @@ export default function HostHome() {
         </IconButton>
       }
       buttonRightComponent={
-        <Button color="inherit" onClick={() => auth.signOut()}>
-          Logout
-        </Button>
+        <IconButton color="inherit" onClick={() => history.goBack()}>
+          <Icon>
+            <Clear />
+          </Icon>
+        </IconButton>
       }
-    />
+    >
+      This is survey: {surveyId}
+    </Shell>
   );
 }

@@ -91,7 +91,7 @@ export default function Join() {
         }}
       >
         <div style={{ textAlign: 'center' }}>
-          <Typography variant="h3">{'Hi.'}</Typography>
+          <Typography variant="display1">{'Hi.'}</Typography>
         </div>
         <FormControl variant="outlined" error={surveyInstanceErrorCode !== undefined}>
           <InputLabel ref={surveyCodeLabelRef} htmlFor="survey-code">
