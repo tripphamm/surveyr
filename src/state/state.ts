@@ -20,30 +20,48 @@ export interface SurveyInstance {
   state: string;
 }
 
-export interface Survey {
+export interface Answer {
   id: string;
-  questions: {
-    [questionId: string]: Question;
-  };
+  value: string;
 }
 
 export interface Question {
   id: string;
-  question: string;
-  possibleAnswers: {
-    [answerId: string]: Answer;
-  };
+  value: string;
+  possibleAnswers: Answer[];
 }
 
-export interface Answer {
+export interface UnsavedSurvey {
+  id?: string;
+  authorId?: string;
+  title: string;
+  questions: Question[];
+}
+
+export interface Survey {
   id: string;
-  answer: string;
+  authorId: string;
+  title: string;
+  questions: Question[];
+}
+
+export interface NormalizedQuestion {
+  id: string;
+  value: string;
+  possibleAnswers: { [answerId: string]: Answer };
+}
+
+export interface NormalizedSurvey {
+  id: string;
+  authorId: string;
+  title: string;
+  questions: { [questionId: string]: NormalizedQuestion };
 }
 
 export interface State {
   user: Loadable<User | null>;
   surveyInstance: Loadable<SurveyInstance>;
-  survey: Loadable<Survey>;
+  survey: Loadable<NormalizedSurvey>;
   participantAnswers: { [questionId: string]: string };
   participantAnswerErrors: { [questionId: string]: string | null };
 }

@@ -96,7 +96,7 @@ export default function SurveyQuestion() {
         }}
       >
         <div style={{ textAlign: 'center' }}>
-          <Typography variant="h4">{currentQuestion.question}</Typography>
+          <Typography variant="h4">{currentQuestion.value}</Typography>
         </div>
         {editMode ? (
           <FormControl>
@@ -112,7 +112,7 @@ export default function SurveyQuestion() {
                   key={answerId}
                   value={answerId}
                   control={<Radio />}
-                  label={answer.answer}
+                  label={answer.value}
                 />
               ))}
             </RadioGroup>
@@ -120,7 +120,7 @@ export default function SurveyQuestion() {
         ) : (
           <div style={{ textAlign: 'center' }}>
             <Typography variant="h5" style={{ marginBottom: 50 }}>
-              {currentQuestion.possibleAnswers[currentAnswer].answer}
+              {currentQuestion.possibleAnswers[currentAnswer].value}
             </Typography>
             <Button variant="contained" color="secondary" onClick={() => setEditMode(true)}>
               Change answer

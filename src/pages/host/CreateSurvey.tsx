@@ -1,4 +1,5 @@
 import React, { useReducer } from 'react';
+import uuidv4 from 'uuid/v4';
 import {
   Button,
   IconButton,
@@ -14,39 +15,30 @@ import {
   ListItemSecondaryAction,
   ListItemText,
 } from '@material-ui/core';
-import Red from '@material-ui/core/colors/red';
-import { useMappedState } from 'redux-react-hook';
-import { Clear, Add, MoreVert, Delete } from '@material-ui/icons';
+import { Clear, Add, Delete } from '@material-ui/icons';
+import { useDispatch } from 'redux-react-hook';
 
 import Shell from '../../components/Shell';
 import useRouter from '../../hooks/useRouter';
-import { State } from '../../state/state';
 import EmojiIcon from '../../components/EmojiIcon';
-import classes from '*.module.css';
+import { saveSurvey } from '../../state/actions';
+import { UnsavedSurvey, Question, Answer } from '../../state/state';
 
-const mapState = (s: State) => {
-  return {};
-};
+const reduce = (state: UnsavedSurvey, action: { type: string; payload?: any }) => {
+  // deep-clone the questions so that we can use destructive methods when updating the state
+  // without mutating the in-use state
+  const clonedQuestions = state.questions.reduce<Question[]>((questionsClone, question) => {
+    const clonedAnswers = question.possibleAnswers.reduce<Answer[]>((answersClone, answer) => {
+      answersClone.push({ ...answer });
+      return answersClone;
+    }, []);
 
-interface Question {
-  question: string;
-  answers: {
-    answer: string;
-  }[];
-}
-
-interface SurveyState {
-  title: string;
-  questions: Question[];
-}
-
-const reduce = (state: SurveyState, action: { type: string; payload?: any }) => {
-  const clonedQuestions = state.questions.reduce<Question[]>((clone, question) => {
-    clone.push({
-      question: question.question,
-      answers: [...question.answers],
+    questionsClone.push({
+      ...question,
+      possibleAnswers: clonedAnswers,
     });
-    return clone;
+
+    return questionsClone;
   }, []);
 
   switch (action.type) {
@@ -56,32 +48,43 @@ const reduce = (state: SurveyState, action: { type: string; payload?: any }) => 
         title: action.payload,
       };
     case 'SET_QUESTION':
-      clonedQuestions[action.payload.questionIndex].question = action.payload.value;
+      clonedQuestions[action.payload.questionIndex].value = action.payload.value;
       return {
         ...state,
         questions: clonedQuestions,
       };
     case 'SET_ANSWER':
-      clonedQuestions[action.payload.questionIndex].answers[action.payload.answerIndex].answer =
-        action.payload.value;
+      clonedQuestions[action.payload.questionIndex].possibleAnswers[
+        action.payload.answerIndex
+      ].value = action.payload.value;
       return {
         ...state,
         questions: clonedQuestions,
       };
     case 'ADD_ANSWER':
-      clonedQuestions[action.payload.questionIndex].answers.push({ answer: 'sample answer' });
+      clonedQuestions[action.payload.questionIndex].possibleAnswers.push({
+        id: uuidv4(),
+        value: 'sample answer',
+      });
       return {
         ...state,
         questions: clonedQuestions,
       };
     case 'ADD_QUESTION':
-      clonedQuestions.push({ question: 'Another question?', answers: [{ answer: 'answer' }] });
+      clonedQuestions.push({
+        id: uuidv4(),
+        value: 'Another question?',
+        possibleAnswers: [{ id: uuidv4(), value: 'answer' }],
+      });
       return {
         ...state,
         questions: clonedQuestions,
       };
     case 'REMOVE_ANSWER':
-      clonedQuestions[action.payload.questionIndex].answers.splice(action.payload.answerIndex, 1);
+      clonedQuestions[action.payload.questionIndex].possibleAnswers.splice(
+        action.payload.answerIndex,
+        1,
+      );
       return {
         ...state,
         questions: clonedQuestions,
@@ -97,15 +100,22 @@ const reduce = (state: SurveyState, action: { type: string; payload?: any }) => 
   }
 };
 export default function CreateSurvey() {
-  const [state, dispatch] = useReducer<React.Reducer<SurveyState, { type: string; payload?: any }>>(
-    reduce,
-    {
-      title: '',
-      questions: [{ question: 'Is this a sample question?', answers: [{ answer: 'yep' }] }],
-    },
-  );
+  const [state, dispatchLocal] = useReducer<
+    React.Reducer<UnsavedSurvey, { type: string; payload?: any }>
+  >(reduce, {
+    title: '',
+    questions: [
+      {
+        id: uuidv4(),
+        value: 'Is this a sample question?',
+        possibleAnswers: [{ id: uuidv4(), value: 'yep' }],
+      },
+    ],
+  });
 
   const { title, questions } = state;
+
+  const dispatch = useDispatch();
 
   const { history } = useRouter();
 
@@ -128,6 +138,7 @@ export default function CreateSurvey() {
           style={{ height: '100%', width: '100%' }}
           variant="contained"
           color="primary"
+          onClick={() => dispatch(saveSurvey({ title, questions }))}
           disabled={
             // has a title,
             // has at least one question,
@@ -137,9 +148,9 @@ export default function CreateSurvey() {
             questions.length === 0 ||
             questions.some(
               question =>
-                question.question.length === 0 ||
-                question.answers.length === 0 ||
-                question.answers.some(answer => answer.answer.length === 0),
+                question.value.length === 0 ||
+                question.possibleAnswers.length === 0 ||
+                question.possibleAnswers.some(answer => answer.value.length === 0),
             )
           }
         >
@@ -155,18 +166,18 @@ export default function CreateSurvey() {
         variant="outlined"
         label="Survey title"
         value={title}
-        style={{ marginBottom: 10 }}
+        style={{ marginBottom: 15 }}
         onChange={e => {
-          dispatch({ type: 'SET_TITLE', payload: e.target.value });
+          dispatchLocal({ type: 'SET_TITLE', payload: e.target.value });
         }}
       />
       {questions.map((question, qIndex) => (
-        <Card key={`question-${qIndex}`} style={{ marginBottom: 10 }}>
+        <Card key={`question-${qIndex}`} style={{ marginBottom: 15 }}>
           <CardHeader
             action={
               <IconButton
                 onClick={() =>
-                  dispatch({ type: 'REMOVE_QUESTION', payload: { questionIndex: qIndex } })
+                  dispatchLocal({ type: 'REMOVE_QUESTION', payload: { questionIndex: qIndex } })
                 }
               >
                 <Delete />
@@ -178,9 +189,9 @@ export default function CreateSurvey() {
                 fullWidth
                 variant="outlined"
                 label={`Question ${qIndex + 1}`}
-                value={question.question}
+                value={question.value}
                 onChange={e => {
-                  dispatch({
+                  dispatchLocal({
                     type: 'SET_QUESTION',
                     payload: { questionIndex: qIndex, value: e.target.value },
                   });
@@ -190,16 +201,16 @@ export default function CreateSurvey() {
           />
           <CardContent>
             <List>
-              {question.answers.map((answer, aIndex) => (
+              {question.possibleAnswers.map((answer, aIndex) => (
                 <ListItem key={`answer-${qIndex}-${aIndex}`}>
                   <ListItemText>
                     <TextField
                       fullWidth
                       variant="outlined"
                       label={`Answer ${aIndex + 1}`}
-                      value={answer.answer}
+                      value={answer.value}
                       onChange={e => {
-                        dispatch({
+                        dispatchLocal({
                           type: 'SET_ANSWER',
                           payload: {
                             questionIndex: qIndex,
@@ -214,7 +225,7 @@ export default function CreateSurvey() {
                     <IconButton
                       aria-label="Delete"
                       onClick={() =>
-                        dispatch({
+                        dispatchLocal({
                           type: 'REMOVE_ANSWER',
                           payload: { questionIndex: qIndex, answerIndex: aIndex },
                         })
@@ -230,7 +241,9 @@ export default function CreateSurvey() {
           <CardActions>
             <div style={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
               <IconButton
-                onClick={() => dispatch({ type: 'ADD_ANSWER', payload: { questionIndex: qIndex } })}
+                onClick={() =>
+                  dispatchLocal({ type: 'ADD_ANSWER', payload: { questionIndex: qIndex } })
+                }
               >
                 <Add />
               </IconButton>
@@ -241,7 +254,7 @@ export default function CreateSurvey() {
       <Card>
         <CardContent>
           <div style={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-            <IconButton onClick={() => dispatch({ type: 'ADD_QUESTION' })}>
+            <IconButton onClick={() => dispatchLocal({ type: 'ADD_QUESTION' })}>
               <Add />
             </IconButton>
           </div>
