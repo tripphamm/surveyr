@@ -17,7 +17,7 @@ type ShellProps = React.HTMLProps<HTMLDivElement> & {
 
 export default function Shell(props: ShellProps) {
   const {
-    title = 'Surveyr',
+    title = 'Srvy',
     buttonLeftComponent = (
       <IconButton color="inherit">
         <EmojiIcon emojiShortName=":bar_chart:" size={32} />

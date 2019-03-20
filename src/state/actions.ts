@@ -1,4 +1,6 @@
 import { Dispatch } from 'redux';
+import uuidv4 from 'uuid/v4';
+
 import { auth, firestore } from '../services/firebaseService';
 import {
   SurveyInstance,
@@ -37,6 +39,10 @@ export enum ActionType {
   SUBMIT_ANSWER_FAILURE = 'SUBMIT_ANSWER_FAILURE',
   CLEAR_SUBMIT_ANSWER_ERROR = 'CLEAR_SUBMIT_ANSWER_ERROR',
 
+  SET_HOSTED_SURVEY_SUCCESS = 'SET_HOSTED_SURVEY_SUCCESS',
+  SET_HOSTED_SURVEY_FAILURE = 'SET_HOSTED_SURVEY_FAILURE',
+  CLEAR_SET_HOSTED_SURVEY_ERROR = 'CLEAR_SET_HOSTED_SURVEY_ERROR',
+
   SAVE_SURVEY_FAILURE = 'SAVE_SURVEY_FAILURE',
   CLEAR_SAVE_SURVEY_ERROR = 'CLEAR_SAVE_SURVEY_ERROR',
 
@@ -62,6 +68,9 @@ export type Action =
   | SetMySurveysSuccessAction
   | SetMySurveysFailureAction
   | ClearSetMySurveysErrorAction
+  | SetHostedSurveySuccessAction
+  | SetHostedSurveyFailureAction
+  | ClearSetHostedSurveyErrorAction
   | ClearMySurveysAction;
 
 interface SetUserSuccessAction {
@@ -270,6 +279,39 @@ export function createClearSetMySurveysErrorAction(): ClearSetMySurveysErrorActi
   };
 }
 
+interface SetHostedSurveySuccessAction {
+  type: ActionType.SET_HOSTED_SURVEY_SUCCESS;
+  hostedSurvey: SurveyInstance;
+}
+export function createSetHostedSurveySuccessAction(
+  hostedSurvey: SurveyInstance,
+): SetHostedSurveySuccessAction {
+  return {
+    type: ActionType.SET_HOSTED_SURVEY_SUCCESS,
+    hostedSurvey,
+  };
+}
+
+interface SetHostedSurveyFailureAction {
+  type: ActionType.SET_HOSTED_SURVEY_FAILURE;
+  error: string;
+}
+export function createSetHostedSurveyFailureAction(error: string): SetHostedSurveyFailureAction {
+  return {
+    type: ActionType.SET_HOSTED_SURVEY_FAILURE,
+    error,
+  };
+}
+
+interface ClearSetHostedSurveyErrorAction {
+  type: ActionType.CLEAR_SET_HOSTED_SURVEY_ERROR;
+}
+export function createClearSetHostedSurveyErrorAction(): ClearSetHostedSurveyErrorAction {
+  return {
+    type: ActionType.CLEAR_SET_HOSTED_SURVEY_ERROR,
+  };
+}
+
 interface ClearMySurveysAction {
   type: ActionType.CLEAR_MY_SURVEYS;
 }
@@ -466,6 +508,44 @@ export function subscribeToMySurveys() {
         });
     } catch (error) {
       dispatch(createSetMySurveysFailureAction(error.toString()));
+    }
+  };
+}
+
+export function hostSurvey(surveyId: string) {
+  return async (dispatch: Dispatch, getState: () => State) => {
+    try {
+      const stateSnapshot = getState();
+      const { mySurveys, user } = stateSnapshot;
+
+      if (user.value === undefined || user.value === null) {
+        throw ErrorCode.NO_USER;
+      }
+
+      if (mySurveys.value === undefined) {
+        throw 'SURVEYS_NOT_LOADED';
+      }
+
+      const survey = mySurveys.value[surveyId];
+
+      if (survey === undefined) {
+        throw 'SURVEY_DOES_NOT_EXIST';
+      }
+
+      const hostedSurvey = await firestore.collection('survey-instances').add({
+        authorId: user.value.id,
+        surveyId: survey.id,
+        currentQuestionId: Object.values(survey.questions)[0].id,
+        acceptAnswers: false,
+        displayResults: false,
+        shareCode: uuidv4().slice(0, 4),
+      });
+
+      hostedSurvey.onSnapshot(snapshot => {
+        dispatch(createSetHostedSurveySuccessAction(snapshot.data() as SurveyInstance));
+      });
+    } catch (error) {
+      dispatch(createSetHostedSurveyFailureAction(error.toString()));
     }
   };
 }

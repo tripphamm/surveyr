@@ -9,6 +9,7 @@ import Surveys from './Surveys';
 import Survey from './Survey';
 import CreateSurvey from './CreateSurvey';
 import EditSurvey from './EditSurvey';
+import Present from './Present';
 
 const mapState = (s: State) => {
   return {
@@ -40,6 +41,7 @@ export default function HostRoutes() {
       <Route path={`${match.path}/surveys/:surveyId`} component={Survey} />
       <Route exact path={`${match.path}/surveyEditor`} component={CreateSurvey} />
       <Route path={`${match.path}/surveyEditor/:surveyId`} component={EditSurvey} />
+      <Route path={`${match.path}/presentation`} component={Present} />
     </>
   );
 }

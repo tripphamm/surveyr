@@ -1,18 +1,14 @@
-import React, { useReducer } from 'react';
-import uuidv4 from 'uuid/v4';
+import React from 'react';
 import {
   Button,
   IconButton,
   Icon,
-  TextField,
   Typography,
   Card,
   CardContent,
-  CardActions,
   CardHeader,
   List,
   ListItem,
-  ListItemSecondaryAction,
   ListItemText,
 } from '@material-ui/core';
 import { Clear } from '@material-ui/icons';
@@ -22,13 +18,14 @@ import { Redirect } from 'react-router-dom';
 import Shell from '../../components/Shell';
 import useRouter from '../../hooks/useRouter';
 import EmojiIcon from '../../components/EmojiIcon';
-import { saveSurvey } from '../../state/actions';
 import { State } from '../../state/state';
 import NotFound from '../NotFound';
+import { hostSurvey } from '../../state/actions';
 
 const mapState = (state: State) => {
   return {
     mySurveys: state.mySurveys.value,
+    hostedSurvey: state.hostedSurvey.value,
   };
 };
 
@@ -39,7 +36,11 @@ export default function Survey() {
   const { params } = match;
   const { surveyId } = params;
 
-  const { mySurveys } = useMappedState(mapState);
+  const { mySurveys, hostedSurvey } = useMappedState(mapState);
+
+  if (hostedSurvey !== undefined) {
+    return <Redirect to="/host/presentation" />;
+  }
 
   if (mySurveys === undefined) {
     return <Redirect to="/host/surveys" />;
@@ -59,7 +60,7 @@ export default function Survey() {
         </IconButton>
       }
       buttonRightComponent={
-        <IconButton color="inherit" onClick={() => history.goBack()}>
+        <IconButton color="inherit" onClick={() => history.push('/host/surveys')}>
           <Icon>
             <Clear />
           </Icon>
@@ -70,7 +71,9 @@ export default function Survey() {
           style={{ height: '100%', width: '100%' }}
           variant="contained"
           color="primary"
-          onClick={async () => {}}
+          onClick={async () => {
+            await dispatch(hostSurvey(surveyId));
+          }}
         >
           Start
         </Button>

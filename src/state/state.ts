@@ -14,10 +14,12 @@ export interface User {
 
 export interface SurveyInstance {
   id: string;
+  authorId: string;
   shareCode: string;
   surveyId: string;
   currentQuestionId: string;
-  state: string;
+  acceptAnswers: boolean;
+  showResults: boolean;
 }
 
 export interface Answer {
@@ -69,6 +71,7 @@ export interface State {
   mySurveys: Loadable<NormalizedSurveys>;
   participantAnswers: { [questionId: string]: string };
   participantAnswerErrors: { [questionId: string]: string | null };
+  hostedSurvey: Loadable<SurveyInstance>;
 }
 
 export const initialState: State = {
@@ -76,6 +79,7 @@ export const initialState: State = {
   surveyInstance: { loading: false },
   activeSurvey: { loading: false },
   mySurveys: { loading: false },
+  hostedSurvey: { loading: false },
   participantAnswers: {},
   participantAnswerErrors: {},
 };
@@ -172,11 +176,27 @@ export const reducer = (state: State = initialState, action: Action): State => {
         ...state,
         mySurveys: { ...state.mySurveys, errorCode: undefined },
       };
+    case ActionType.SET_HOSTED_SURVEY_SUCCESS:
+      return {
+        ...state,
+        hostedSurvey: { loading: false, errorCode: undefined, value: action.hostedSurvey },
+      };
+    case ActionType.SET_HOSTED_SURVEY_FAILURE:
+      return {
+        ...state,
+        hostedSurvey: { loading: false, errorCode: action.error, value: undefined },
+      };
+    case ActionType.CLEAR_SET_HOSTED_SURVEY_ERROR:
+      return {
+        ...state,
+        hostedSurvey: { ...state.hostedSurvey, errorCode: undefined },
+      };
     case ActionType.CLEAR_MY_SURVEYS:
       return {
         ...state,
         mySurveys: { loading: false, errorCode: undefined, value: undefined },
       };
+
     default:
       return state;
   }
