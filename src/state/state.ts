@@ -22,6 +22,10 @@ export interface SurveyInstance {
   showResults: boolean;
 }
 
+export interface SurveyAnswersByQuestionId {
+  [questionId: string]: { answerId: string; participantId: string }[];
+}
+
 export interface Answer {
   id: string;
   value: string;
@@ -47,10 +51,17 @@ export interface Survey {
   questions: Question[];
 }
 
+export interface NormalizedAnswer {
+  id: string;
+  number: number;
+  value: string;
+}
+
 export interface NormalizedQuestion {
   id: string;
+  number: number;
   value: string;
-  possibleAnswers: { [answerId: string]: Answer };
+  possibleAnswers: { [answerId: string]: NormalizedAnswer };
 }
 
 export interface NormalizedSurvey {
@@ -67,16 +78,18 @@ export interface NormalizedSurveys {
 export interface State {
   user: Loadable<User | null>;
   surveyInstance: Loadable<SurveyInstance>;
+  surveyAnswers: Loadable<SurveyAnswersByQuestionId>;
   activeSurvey: Loadable<NormalizedSurvey>;
   mySurveys: Loadable<NormalizedSurveys>;
-  participantAnswers: { [questionId: string]: string };
-  participantAnswerErrors: { [questionId: string]: string | null };
+  participantAnswers: { [surveyInstanceId: string]: { [questionId: string]: string } };
+  participantAnswerErrors: { [surveyInstanceId: string]: { [questionId: string]: string | null } };
   hostedSurvey: Loadable<SurveyInstance>;
 }
 
 export const initialState: State = {
   user: { loading: true },
   surveyInstance: { loading: false },
+  surveyAnswers: { loading: false },
   activeSurvey: { loading: false },
   mySurveys: { loading: false },
   hostedSurvey: { loading: false },
@@ -142,7 +155,10 @@ export const reducer = (state: State = initialState, action: Action): State => {
         ...state,
         participantAnswers: {
           ...state.participantAnswers,
-          [action.questionId]: action.answerId,
+          [action.surveyInstanceId]: {
+            ...(state.participantAnswers[action.surveyInstanceId] || {}),
+            [action.questionId]: action.answerId,
+          },
         },
       };
     case ActionType.SUBMIT_ANSWER_FAILURE:
@@ -150,7 +166,10 @@ export const reducer = (state: State = initialState, action: Action): State => {
         ...state,
         participantAnswerErrors: {
           ...state.participantAnswerErrors,
-          [action.questionId]: action.error,
+          [action.surveyInstanceId]: {
+            ...(state.participantAnswerErrors[action.surveyInstanceId] || {}),
+            [action.questionId]: action.error,
+          },
         },
       };
     case ActionType.CLEAR_SUBMIT_ANSWER_ERROR:
@@ -158,7 +177,10 @@ export const reducer = (state: State = initialState, action: Action): State => {
         ...state,
         participantAnswerErrors: {
           ...state.participantAnswerErrors,
-          [action.questionId]: null,
+          [action.surveyInstanceId]: {
+            ...(state.participantAnswerErrors[action.surveyInstanceId] || {}),
+            [action.questionId]: null,
+          },
         },
       };
     case ActionType.SET_MY_SURVEYS_SUCCESS:
@@ -191,12 +213,31 @@ export const reducer = (state: State = initialState, action: Action): State => {
         ...state,
         hostedSurvey: { ...state.hostedSurvey, errorCode: undefined },
       };
+    case ActionType.SET_SURVEY_ANSWERS_SUCCESS:
+      return {
+        ...state,
+        surveyAnswers: { loading: false, errorCode: undefined, value: action.surveyAnswers },
+      };
+    case ActionType.SET_SURVEY_ANSWERS_FAILURE:
+      return {
+        ...state,
+        surveyAnswers: { loading: false, errorCode: action.error, value: undefined },
+      };
+    case ActionType.CLEAR_SET_SURVEY_ANSWERS_ERROR:
+      return {
+        ...state,
+        surveyAnswers: { ...state.surveyAnswers, errorCode: undefined },
+      };
     case ActionType.CLEAR_MY_SURVEYS:
       return {
         ...state,
         mySurveys: { loading: false, errorCode: undefined, value: undefined },
       };
-
+    case ActionType.STOP_HOSTING_SURVEY:
+      return {
+        ...state,
+        hostedSurvey: { loading: false, errorCode: undefined, value: undefined },
+      };
     default:
       return state;
   }

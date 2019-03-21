@@ -13,6 +13,8 @@ import {
   NormalizedSurvey,
   Loadable,
   NormalizedSurveys,
+  SurveyAnswersByQuestionId,
+  NormalizedAnswer,
 } from './state';
 import ErrorCode from '../settings/ErrorCode';
 
@@ -43,10 +45,15 @@ export enum ActionType {
   SET_HOSTED_SURVEY_FAILURE = 'SET_HOSTED_SURVEY_FAILURE',
   CLEAR_SET_HOSTED_SURVEY_ERROR = 'CLEAR_SET_HOSTED_SURVEY_ERROR',
 
+  SET_SURVEY_ANSWERS_SUCCESS = 'SET_SURVEY_ANSWERS_SUCCESS',
+  SET_SURVEY_ANSWERS_FAILURE = 'SET_SURVEY_ANSWERS_FAILURE',
+  CLEAR_SET_SURVEY_ANSWERS_ERROR = 'CLEAR_SET_SURVEY_ANSWERS_ERROR',
+
   SAVE_SURVEY_FAILURE = 'SAVE_SURVEY_FAILURE',
   CLEAR_SAVE_SURVEY_ERROR = 'CLEAR_SAVE_SURVEY_ERROR',
 
   CLEAR_MY_SURVEYS = 'CLEAR_MY_SURVEYS',
+  STOP_HOSTING_SURVEY = 'STOP_HOSTING_SURVEY',
 }
 
 export type Action =
@@ -71,7 +78,11 @@ export type Action =
   | SetHostedSurveySuccessAction
   | SetHostedSurveyFailureAction
   | ClearSetHostedSurveyErrorAction
-  | ClearMySurveysAction;
+  | SetSurveyAnswersSuccessAction
+  | SetSurveyAnswersFailureAction
+  | ClearSetSurveyAnswersErrorAction
+  | ClearMySurveysAction
+  | StopHostingSurveyAction;
 
 interface SetUserSuccessAction {
   type: ActionType.SET_USER_SUCCESS;
@@ -183,15 +194,18 @@ export function createLeaveSurveyAction(): LeaveSurveyAction {
 
 interface SubmitAnswerSuccessAction {
   type: ActionType.SUBMIT_ANSWER_SUCCESS;
+  surveyInstanceId: string;
   questionId: string;
   answerId: string;
 }
 export function createSubmitAnswerSuccessAction(
+  surveyInstanceId: string,
   questionId: string,
   answerId: string,
 ): SubmitAnswerSuccessAction {
   return {
     type: ActionType.SUBMIT_ANSWER_SUCCESS,
+    surveyInstanceId,
     questionId,
     answerId,
   };
@@ -199,15 +213,18 @@ export function createSubmitAnswerSuccessAction(
 
 interface SubmitAnswerFailureAction {
   type: ActionType.SUBMIT_ANSWER_FAILURE;
+  surveyInstanceId: string;
   questionId: string;
   error: string;
 }
 export function createSubmitAnswerFailureAction(
+  surveyInstanceId: string,
   questionId: string,
   error: string,
 ): SubmitAnswerFailureAction {
   return {
     type: ActionType.SUBMIT_ANSWER_FAILURE,
+    surveyInstanceId,
     questionId,
     error,
   };
@@ -215,13 +232,16 @@ export function createSubmitAnswerFailureAction(
 
 interface ClearSubmitAnswerErrorAction {
   type: ActionType.CLEAR_SUBMIT_ANSWER_ERROR;
+  surveyInstanceId: string;
   questionId: string;
 }
 export function createClearSubmitAnswerErrorAction(
+  surveyInstanceId: string,
   questionId: string,
 ): ClearSubmitAnswerErrorAction {
   return {
     type: ActionType.CLEAR_SUBMIT_ANSWER_ERROR,
+    surveyInstanceId,
     questionId,
   };
 }
@@ -312,6 +332,39 @@ export function createClearSetHostedSurveyErrorAction(): ClearSetHostedSurveyErr
   };
 }
 
+interface SetSurveyAnswersSuccessAction {
+  type: ActionType.SET_SURVEY_ANSWERS_SUCCESS;
+  surveyAnswers: SurveyAnswersByQuestionId;
+}
+export function createSetSurveyAnswersSuccessAction(
+  surveyAnswers: SurveyAnswersByQuestionId,
+): SetSurveyAnswersSuccessAction {
+  return {
+    type: ActionType.SET_SURVEY_ANSWERS_SUCCESS,
+    surveyAnswers,
+  };
+}
+
+interface SetSurveyAnswersFailureAction {
+  type: ActionType.SET_SURVEY_ANSWERS_FAILURE;
+  error: string;
+}
+export function createSetSurveyAnswersFailureAction(error: string): SetSurveyAnswersFailureAction {
+  return {
+    type: ActionType.SET_SURVEY_ANSWERS_FAILURE,
+    error,
+  };
+}
+
+interface ClearSetSurveyAnswersErrorAction {
+  type: ActionType.CLEAR_SET_SURVEY_ANSWERS_ERROR;
+}
+export function createClearSetSurveyAnswersErrorAction(): ClearSetSurveyAnswersErrorAction {
+  return {
+    type: ActionType.CLEAR_SET_SURVEY_ANSWERS_ERROR,
+  };
+}
+
 interface ClearMySurveysAction {
   type: ActionType.CLEAR_MY_SURVEYS;
 }
@@ -321,21 +374,34 @@ export function createClearMySurveysAction(): ClearMySurveysAction {
   };
 }
 
+interface StopHostingSurveyAction {
+  type: ActionType.STOP_HOSTING_SURVEY;
+}
+export function createStopHostingSurveyAction(): StopHostingSurveyAction {
+  return {
+    type: ActionType.STOP_HOSTING_SURVEY,
+  };
+}
+
 // async
 
 function normalizeSurvey(survey: Survey): NormalizedSurvey {
   const normalizedQuestions = survey.questions.reduce<{
     [questionId: string]: NormalizedQuestion;
-  }>((questions, question) => {
+  }>((questions, question, qIndex) => {
     const normalizedAnswers = question.possibleAnswers.reduce<{
-      [answerId: string]: Answer;
-    }>((answers, answer) => {
-      answers[answer.id] = answer;
+      [answerId: string]: NormalizedAnswer;
+    }>((answers, answer, aIndex) => {
+      answers[answer.id] = {
+        ...answer,
+        number: aIndex,
+      };
       return answers;
     }, {});
 
     questions[question.id] = {
       ...question,
+      number: qIndex,
       possibleAnswers: normalizedAnswers,
     };
 
@@ -425,20 +491,38 @@ export function submitAnswer(surveyInstanceId: string, questionId: string, answe
         throw ErrorCode.NO_USER;
       }
 
+      const existingAnswersSnapshot = await firestore
+        .collection('participant-answers')
+        .doc(surveyInstanceId)
+        .collection('answers')
+        .where('participantId', '==', user.value.id)
+        .where('questionId', '==', questionId)
+        .get();
+
+      // delete any existing answers (technically, there should only be one)
+      if (!existingAnswersSnapshot.empty) {
+        const batch = firestore.batch();
+
+        existingAnswersSnapshot.docs.forEach(existingAnswerDoc => {
+          batch.delete(existingAnswerDoc.ref);
+        });
+
+        await batch.commit();
+      }
+
       await firestore
         .collection('participant-answers')
         .doc(surveyInstanceId)
-        .collection('participants')
-        .doc(user.value.id)
-        .collection('questions')
-        .doc(questionId)
-        .set({
+        .collection('answers')
+        .add({
+          participantId: user.value.id,
+          questionId,
           answerId,
         });
 
-      dispatch(createSubmitAnswerSuccessAction(questionId, answerId));
+      dispatch(createSubmitAnswerSuccessAction(surveyInstanceId, questionId, answerId));
     } catch (error) {
-      dispatch(createSubmitAnswerFailureAction(questionId, error.toString()));
+      dispatch(createSubmitAnswerFailureAction(surveyInstanceId, questionId, error.toString()));
     }
   };
 }
@@ -512,6 +596,7 @@ export function subscribeToMySurveys() {
   };
 }
 
+let unsubscribeFromHostedSurvey: (() => void) | undefined;
 export function hostSurvey(surveyId: string) {
   return async (dispatch: Dispatch, getState: () => State) => {
     try {
@@ -535,17 +620,70 @@ export function hostSurvey(surveyId: string) {
       const hostedSurvey = await firestore.collection('survey-instances').add({
         authorId: user.value.id,
         surveyId: survey.id,
-        currentQuestionId: Object.values(survey.questions)[0].id,
+        // we can assume that the 'find' will come back with an element since the `number`
+        // prop is coming from the index in the question array
+        currentQuestionId: Object.values(survey.questions).find(q => q.number === 0)!.id,
         acceptAnswers: false,
         displayResults: false,
         shareCode: uuidv4().slice(0, 4),
       });
 
-      hostedSurvey.onSnapshot(snapshot => {
-        dispatch(createSetHostedSurveySuccessAction(snapshot.data() as SurveyInstance));
+      unsubscribeFromHostedSurvey = hostedSurvey.onSnapshot(snapshot => {
+        const surveyInstance = snapshot.data() as SurveyInstance;
+        surveyInstance.id = snapshot.id;
+        dispatch(createSetHostedSurveySuccessAction(surveyInstance));
       });
     } catch (error) {
       dispatch(createSetHostedSurveyFailureAction(error.toString()));
+    }
+  };
+}
+
+export function stopHostingSurvey() {
+  return async (dispatch: Dispatch) => {
+    if (typeof unsubscribeFromHostedSurvey === 'function') {
+      unsubscribeFromHostedSurvey();
+    }
+
+    dispatch(createStopHostingSurveyAction());
+  };
+}
+
+export function subscribeToSurveyAnswers(surveyInstanceId: string) {
+  return async (dispatch: Dispatch) => {
+    try {
+      firestore
+        .collection('participant-answers')
+        .doc(surveyInstanceId)
+        .collection('answers')
+        .onSnapshot(snapshot => {
+          try {
+            const answerDocs = snapshot.docs;
+
+            const normalizedAnswers = answerDocs.reduce<SurveyAnswersByQuestionId>(
+              (answers, answerDoc) => {
+                const answerData = answerDoc.data();
+                if (answers[answerData.questionId] === undefined) {
+                  answers[answerData.questionId] = [];
+                }
+
+                answers[answerData.questionId].push({
+                  answerId: answerData.answerId,
+                  participantId: answerData.participantId,
+                });
+
+                return answers;
+              },
+              {},
+            );
+
+            dispatch(createSetSurveyAnswersSuccessAction(normalizedAnswers));
+          } catch (error) {
+            dispatch(createSetSurveyAnswersFailureAction(error.toString()));
+          }
+        });
+    } catch (error) {
+      dispatch(createSetSurveyAnswersFailureAction(error.toString()));
     }
   };
 }

@@ -1,16 +1,5 @@
-import React from 'react';
-import {
-  Button,
-  IconButton,
-  Icon,
-  Typography,
-  Card,
-  CardContent,
-  CardHeader,
-  List,
-  ListItem,
-  ListItemText,
-} from '@material-ui/core';
+import React, { useEffect } from 'react';
+import { Button, IconButton, Icon, Typography } from '@material-ui/core';
 import { Clear } from '@material-ui/icons';
 import { useDispatch, useMappedState } from 'redux-react-hook';
 import { Redirect } from 'react-router-dom';
@@ -20,20 +9,30 @@ import useRouter from '../../hooks/useRouter';
 import EmojiIcon from '../../components/EmojiIcon';
 import { State } from '../../state/state';
 import NotFound from '../NotFound';
+import { subscribeToSurveyAnswers, stopHostingSurvey } from '../../state/actions';
+import { firestore } from '../../services/firebaseService';
 
 const mapState = (state: State) => {
   return {
     hostedSurvey: state.hostedSurvey.value,
     mySurveys: state.mySurveys.value,
+    surveyAnswers: state.surveyAnswers.value,
   };
 };
 
-export default function Survey() {
+export default function Present() {
   const dispatch = useDispatch();
 
   const { history } = useRouter();
 
-  const { hostedSurvey, mySurveys } = useMappedState(mapState);
+  const { hostedSurvey, mySurveys, surveyAnswers } = useMappedState(mapState);
+
+  const hostedSurveyId = hostedSurvey ? hostedSurvey.id : undefined;
+  useEffect(() => {
+    if (hostedSurveyId !== undefined) {
+      dispatch(subscribeToSurveyAnswers(hostedSurveyId));
+    }
+  }, [dispatch, hostedSurveyId]);
 
   if (hostedSurvey === undefined || mySurveys === undefined) {
     return <Redirect to="/host/surveys" />;
@@ -45,7 +44,27 @@ export default function Survey() {
     return <NotFound />;
   }
 
+  const questions = Object.values(survey.questions).sort((a, b) => a.number - b.number);
   const currentQuestion = survey.questions[hostedSurvey.currentQuestionId];
+
+  let responses: { [answerId: string]: number } = {};
+  if (surveyAnswers !== undefined && surveyAnswers[hostedSurvey.currentQuestionId] !== undefined) {
+    responses = surveyAnswers[hostedSurvey.currentQuestionId].reduce<{
+      [answerId: string]: number;
+    }>((r, surveyAnswer) => {
+      if (r[surveyAnswer.answerId] === undefined) {
+        r[surveyAnswer.answerId] = 1;
+      } else {
+        r[surveyAnswer.answerId] = r[surveyAnswer.answerId] + 1;
+      }
+
+      return r;
+    }, {});
+  }
+
+  console.log(responses);
+
+  const responsesCount = Object.values(responses).reduce((acc, count) => acc + count, 0);
 
   return (
     <Shell
@@ -56,7 +75,13 @@ export default function Survey() {
         </IconButton>
       }
       buttonRightComponent={
-        <IconButton color="inherit" onClick={() => history.push('/host/surveys')}>
+        <IconButton
+          color="inherit"
+          onClick={async () => {
+            await dispatch(stopHostingSurvey());
+            history.push('/host/surveys');
+          }}
+        >
           <Icon>
             <Clear />
           </Icon>
@@ -68,7 +93,16 @@ export default function Survey() {
             style={{ height: 'inherit', width: '25%' }}
             variant="contained"
             color="primary"
-            onClick={async () => {}}
+            onClick={() => {
+              if (currentQuestion.number > 0) {
+                firestore
+                  .collection('survey-instances')
+                  .doc(hostedSurveyId)
+                  .update({
+                    currentQuestionId: questions[currentQuestion.number - 1].id,
+                  });
+              }
+            }}
           >
             Back
           </Button>
@@ -76,7 +110,14 @@ export default function Survey() {
             style={{ height: 'inherit', width: '25%' }}
             variant="contained"
             color="primary"
-            onClick={async () => {}}
+            onClick={() => {
+              firestore
+                .collection('survey-instances')
+                .doc(hostedSurveyId)
+                .update({
+                  acceptAnswers: !hostedSurvey.acceptAnswers,
+                });
+            }}
           >
             Collect
           </Button>
@@ -84,7 +125,14 @@ export default function Survey() {
             style={{ height: 'inherit', width: '25%' }}
             variant="contained"
             color="primary"
-            onClick={async () => {}}
+            onClick={() => {
+              firestore
+                .collection('survey-instances')
+                .doc(hostedSurveyId)
+                .update({
+                  showResults: !hostedSurvey.showResults,
+                });
+            }}
           >
             Results
           </Button>
@@ -92,19 +140,55 @@ export default function Survey() {
             style={{ height: 'inherit', width: '25%' }}
             variant="contained"
             color="primary"
-            onClick={async () => {}}
+            onClick={() => {
+              if (currentQuestion.number < questions.length - 1) {
+                firestore
+                  .collection('survey-instances')
+                  .doc(hostedSurveyId)
+                  .update({
+                    currentQuestionId: questions[currentQuestion.number + 1].id,
+                  });
+              }
+            }}
           >
             Next
           </Button>
         </div>
       }
     >
-      <Typography variant="display2" gutterBottom>
-        srvy.live/{hostedSurvey.shareCode}
-      </Typography>
-      <Typography variant="display1" gutterBottom>
-        {currentQuestion.value}
-      </Typography>
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-evenly',
+          alignItems: 'center',
+
+          textAlign: 'center',
+        }}
+      >
+        <Typography style={{ position: 'absolute', top: 10, left: 10 }} variant="display1">
+          {hostedSurvey.shareCode}
+        </Typography>
+
+        <Typography variant="h4">{currentQuestion.value}</Typography>
+
+        <Typography variant="display1">
+          {`${responsesCount} response${responsesCount !== 1 ? 's' : ''}`}
+        </Typography>
+
+        {currentQuestion &&
+          Object.values(currentQuestion.possibleAnswers).map(possibleAnswer => (
+            <div key={`presentation-answer-${possibleAnswer.id}`}>
+              <Typography>{possibleAnswer.value}</Typography>
+              {hostedSurvey.showResults && (
+                <Typography>{responses[possibleAnswer.id] || 0}</Typography>
+              )}
+            </div>
+          ))}
+      </div>
     </Shell>
   );
 }

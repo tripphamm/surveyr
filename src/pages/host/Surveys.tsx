@@ -13,7 +13,6 @@ import Loading from '../../components/Loading';
 
 const mapState = (s: State) => {
   return {
-    user: s.user.value,
     mySurveys: s.mySurveys.value,
   };
 };
@@ -22,7 +21,7 @@ export default function HostHome() {
   const { history } = useRouter();
   const dispatch = useDispatch();
 
-  const { user, mySurveys } = useMappedState(mapState);
+  const { mySurveys } = useMappedState(mapState);
 
   useEffect(() => {
     dispatch(subscribeToMySurveys());

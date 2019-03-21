@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
+  CircularProgress,
   Typography,
-  Button,
   FormLabel,
   FormControl,
   RadioGroup,
@@ -11,7 +11,7 @@ import {
   IconButton,
 } from '@material-ui/core';
 import { useDispatch, useMappedState } from 'redux-react-hook';
-import { Clear } from '@material-ui/icons';
+import { Clear, RadioButtonUnchecked } from '@material-ui/icons';
 
 import Shell from '../../components/Shell';
 import EmojiIcon from '../../components/EmojiIcon';
@@ -19,6 +19,7 @@ import useRouter from '../../hooks/useRouter';
 import { getSurvey, leaveSurvey, submitAnswer } from '../../state/actions';
 import { State, SurveyInstance } from '../../state/state';
 import Loading from '../../components/Loading';
+import { radioButtonIconSize } from '../../settings/magicNumbers';
 
 const mapState = (s: State) => {
   return {
@@ -32,16 +33,19 @@ const mapState = (s: State) => {
 };
 
 export default function SurveyQuestion() {
-  const [submitting, setSubmitting] = useState(false);
-  const [editMode, setEditMode] = useState(true);
-  const [answerId, setAnswerId] = useState<string | undefined>(undefined);
+  const [submission, setSubmission] = useState<{ submitting: boolean; value: null | string }>({
+    submitting: false,
+    value: null,
+  });
   const { history } = useRouter();
   const dispatch = useDispatch();
   const { participantAnswers, surveyInstance, activeSurvey } = useMappedState(mapState);
 
+  const { surveyId } = surveyInstance;
+
   useEffect(() => {
-    dispatch(getSurvey(surveyInstance.surveyId));
-  }, [surveyInstance.surveyId]);
+    dispatch(getSurvey(surveyId));
+  }, [dispatch, surveyId]);
 
   if (activeSurvey === undefined) {
     return <Loading />;
@@ -53,10 +57,12 @@ export default function SurveyQuestion() {
     throw new Error("Current question doesn't exist in the survey");
   }
 
-  const currentAnswer = participantAnswers[currentQuestion.id];
+  const answers = participantAnswers[surveyInstance.id] || {};
+  const currentAnswerId = answers[currentQuestion.id];
 
   return (
     <Shell
+      title={`Srvy | ${surveyInstance.shareCode}`}
       buttonLeftComponent={
         <IconButton onClick={() => history.push('/')}>
           <EmojiIcon emojiShortName=":bar_chart:" size={32} />
@@ -68,23 +74,6 @@ export default function SurveyQuestion() {
             <Clear />
           </Icon>
         </IconButton>
-      }
-      bottomBarComponent={
-        <Button
-          style={{ height: '100%', width: '100%' }}
-          variant="contained"
-          color="primary"
-          onClick={async () => {
-            setSubmitting(true);
-            // assumed answerId is not undefined since the button should be disabled in that case
-            await dispatch(submitAnswer(surveyInstance.id, currentQuestion.id, answerId!));
-            setEditMode(false);
-            setSubmitting(false);
-          }}
-          disabled={answerId === undefined || submitting}
-        >
-          Submit
-        </Button>
       }
     >
       <div
@@ -98,35 +87,41 @@ export default function SurveyQuestion() {
         <div style={{ textAlign: 'center' }}>
           <Typography variant="h4">{currentQuestion.value}</Typography>
         </div>
-        {editMode ? (
-          <FormControl>
-            <FormLabel>Your answer</FormLabel>
-            <RadioGroup
-              aria-label="Your answer"
-              name="question"
-              value={answerId}
-              onChange={e => setAnswerId((e.target as HTMLInputElement).value)}
-            >
-              {Object.entries(currentQuestion.possibleAnswers).map(([answerId, answer]) => (
-                <FormControlLabel
-                  key={answerId}
-                  value={answerId}
-                  control={<Radio />}
-                  label={answer.value}
-                />
-              ))}
-            </RadioGroup>
-          </FormControl>
-        ) : (
-          <div style={{ textAlign: 'center' }}>
-            <Typography variant="h5" style={{ marginBottom: 50 }}>
-              {currentQuestion.possibleAnswers[currentAnswer].value}
-            </Typography>
-            <Button variant="contained" color="secondary" onClick={() => setEditMode(true)}>
-              Change answer
-            </Button>
-          </div>
-        )}
+        <FormControl>
+          <FormLabel>Your answer</FormLabel>
+          <RadioGroup
+            aria-label="Your answer"
+            name={`question-${currentQuestion.id}-answers`}
+            value={currentAnswerId}
+            onChange={async e => {
+              const value = (e.target as HTMLInputElement).value;
+              setSubmission({ submitting: true, value });
+              await dispatch(submitAnswer(surveyInstance.id, currentQuestion.id, value));
+              setSubmission({ submitting: false, value: null });
+            }}
+          >
+            {Object.entries(currentQuestion.possibleAnswers).map(([answerId, answer]) => (
+              <FormControlLabel
+                key={answerId}
+                disabled={submission.submitting}
+                value={answerId}
+                control={
+                  <Radio
+                    checked={answerId === currentAnswerId}
+                    icon={
+                      submission.submitting && answerId === submission.value ? (
+                        <CircularProgress size={radioButtonIconSize} />
+                      ) : (
+                        <RadioButtonUnchecked />
+                      )
+                    }
+                  />
+                }
+                label={answer.value}
+              />
+            ))}
+          </RadioGroup>
+        </FormControl>
       </div>
     </Shell>
   );
