@@ -14,6 +14,13 @@ import Present from '../pages/Present';
 import Loading from '../pages/Loading';
 import ErrorMessage from '../pages/ErrorMessage';
 import NotFound from '../pages/NotFound';
+import {
+  getSurveysPath,
+  getCreateSurveyPath,
+  getEditSurveyPath,
+  getPresentSurveyPath,
+  getSurveyPath,
+} from '../utils/routeUtil';
 
 export default function HostRoutes(props: { user: User }) {
   const { user } = props;
@@ -41,33 +48,32 @@ export default function HostRoutes(props: { user: User }) {
       <Route
         exact
         path={`${match.path}`}
-        // redirect /host to /host/surveys
-        render={props => <Redirect {...props} to={`${match.path}/surveys`} />}
+        render={props => <Redirect {...props} to={getSurveysPath()} />}
       />
       <Route
-        path={`${match.path}/surveys`}
+        path={getSurveysPath()}
         exact
         render={props => <Surveys {...props} surveys={mySurveys.value!} />}
       />
       <Route
-        path={`${match.path}/surveys/add`}
+        path={getCreateSurveyPath()}
         exact
         render={props => <CreateSurvey {...props} saveSurvey={saveSurvey} />}
       />
       <Route
-        path={`${match.path}/surveys/:surveyId/edit`}
+        path={getEditSurveyPath()}
         exact
         render={props => (
           <EditSurvey {...props} surveys={mySurveys.value!} saveSurvey={saveSurvey} />
         )}
       />
       <Route
-        path={`${match.path}/surveys/:surveyId/present`}
+        path={getPresentSurveyPath()}
         exact
         render={props => <Present {...props} surveys={mySurveys.value!} />}
       />
       <Route
-        path={`${match.path}/surveys/:surveyId`}
+        path={getSurveyPath()}
         render={props => <Survey {...props} surveys={mySurveys.value!} />}
       />
 

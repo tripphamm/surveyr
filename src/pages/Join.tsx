@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import Shell from '../components/Shell';
 import EmojiIcon from '../components/EmojiIcon';
 import useRouter from '../hooks/useRouter';
-import { getSurveyQuestionPath } from '../utils/routeUtil';
+import { getHostPath, getSurveyQuestionPath } from '../utils/routeUtil';
 
 export default function Join() {
   const urlParameters = new URLSearchParams(window.location.search);
@@ -51,7 +51,7 @@ export default function Join() {
           onChange={e => setShareCode(e.target.value)}
           autoComplete="off"
         />
-        <Link to="/host">
+        <Link to={getHostPath()}>
           <Typography>{'I want to host a survey'}</Typography>
         </Link>
       </div>

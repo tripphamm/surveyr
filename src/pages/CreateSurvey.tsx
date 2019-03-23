@@ -4,6 +4,8 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { UnsavedSurvey } from '../state/state';
 import SurveyEditor from './SurveyEditor';
+import useRouter from '../hooks/useRouter';
+import { getSurveysPath } from '../utils/routeUtil';
 
 export default function CreateSurvey(
   props: RouteComponentProps & {
@@ -11,7 +13,7 @@ export default function CreateSurvey(
   },
 ) {
   const { saveSurvey } = props;
-
+  const { history } = useRouter();
   const initialSurveyData: UnsavedSurvey = {
     title: '',
     questions: [
@@ -23,5 +25,13 @@ export default function CreateSurvey(
     ],
   };
 
-  return <SurveyEditor initialSurveyData={initialSurveyData} saveSurvey={saveSurvey} />;
+  return (
+    <SurveyEditor
+      initialSurveyData={initialSurveyData}
+      onSave={async (unsavedSurvey: UnsavedSurvey) => {
+        await saveSurvey(unsavedSurvey);
+        history.push(getSurveysPath());
+      }}
+    />
+  );
 }

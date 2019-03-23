@@ -101,9 +101,9 @@ const reduce = (state: UnsavedSurvey, action: { type: string; payload?: any }) =
 
 export default function SurveyEditor(props: {
   initialSurveyData: UnsavedSurvey;
-  saveSurvey: (unsavedSurvey: UnsavedSurvey) => Promise<void>;
+  onSave: (unsavedSurvey: UnsavedSurvey) => Promise<void>;
 }) {
-  const { initialSurveyData, saveSurvey } = props;
+  const { initialSurveyData, onSave } = props;
 
   const [unsavedSurvey, dispatchLocal] = useReducer<
     React.Reducer<UnsavedSurvey, { type: string; payload?: any }>
@@ -132,9 +132,8 @@ export default function SurveyEditor(props: {
           style={{ height: '100%', width: '100%' }}
           variant="contained"
           color="primary"
-          onClick={async () => {
-            await saveSurvey(unsavedSurvey);
-            history.push(getSurveysPath());
+          onClick={() => {
+            onSave(unsavedSurvey);
           }}
           disabled={
             // has a title,

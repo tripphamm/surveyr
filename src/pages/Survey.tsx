@@ -17,9 +17,10 @@ import { RouteComponentProps } from 'react-router-dom';
 import Shell from '../components/Shell';
 import useRouter from '../hooks/useRouter';
 import EmojiIcon from '../components/EmojiIcon';
+import FloatingEditButton from '../components/FloatingEditButton';
 import { NormalizedSurveys } from '../state/state';
 import NotFound from './NotFound';
-import { getPresentPath } from '../utils/routeUtil';
+import { getPresentSurveyPath, getEditSurveyPath, getSurveysPath } from '../utils/routeUtil';
 
 export default function Survey(props: RouteComponentProps & { surveys: NormalizedSurveys }) {
   const { surveys } = props;
@@ -42,7 +43,7 @@ export default function Survey(props: RouteComponentProps & { surveys: Normalize
         </IconButton>
       }
       buttonRightComponent={
-        <IconButton color="inherit" onClick={() => history.goBack()}>
+        <IconButton color="inherit" onClick={() => history.push(getSurveysPath())}>
           <Icon>
             <Clear />
           </Icon>
@@ -53,7 +54,7 @@ export default function Survey(props: RouteComponentProps & { surveys: Normalize
           style={{ height: '100%', width: '100%' }}
           variant="contained"
           color="primary"
-          onClick={() => history.push(getPresentPath(surveyId))}
+          onClick={() => history.push(getPresentSurveyPath(surveyId))}
         >
           Start
         </Button>
@@ -76,6 +77,7 @@ export default function Survey(props: RouteComponentProps & { surveys: Normalize
           </CardContent>
         </Card>
       ))}
+      <FloatingEditButton onClick={() => history.push(getEditSurveyPath(surveyId))} />
     </Shell>
   );
 }

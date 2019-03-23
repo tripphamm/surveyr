@@ -6,6 +6,7 @@ import { UnsavedSurvey, NormalizedSurveys } from '../state/state';
 import SurveyEditor from './SurveyEditor';
 import NotFound from './NotFound';
 import { denormalizeSurvey } from '../utils/normalizationUtil';
+import { getSurveyPath } from '../utils/routeUtil';
 
 export default function EditSurvey(
   props: RouteComponentProps & {
@@ -15,7 +16,7 @@ export default function EditSurvey(
 ) {
   const { surveys, saveSurvey } = props;
 
-  const { match } = useRouter<{ surveyId: string }>();
+  const { match, history } = useRouter<{ surveyId: string }>();
   const { params } = match;
   const { surveyId } = params;
 
@@ -27,5 +28,13 @@ export default function EditSurvey(
 
   const initialSurveyData: UnsavedSurvey = denormalizeSurvey(survey);
 
-  return <SurveyEditor initialSurveyData={initialSurveyData} saveSurvey={saveSurvey} />;
+  return (
+    <SurveyEditor
+      initialSurveyData={initialSurveyData}
+      onSave={async (unsavedSurvey: UnsavedSurvey) => {
+        await saveSurvey(unsavedSurvey);
+        history.push(getSurveyPath(surveyId));
+      }}
+    />
+  );
 }

@@ -8,6 +8,7 @@ import Shell from '../components/Shell';
 import { State } from '../state/state';
 import EmojiIcon from '../components/EmojiIcon';
 import useRouter from '../hooks/useRouter';
+import { getJoinSurveyPath } from '../utils/routeUtil';
 
 const mapState = (state: State) => {
   return {
@@ -70,14 +71,16 @@ export default function Auth() {
           alignItems: 'center',
         }}
       >
-        <div style={{ textAlign: 'center' }}>
-          <Typography variant="display1" style={{ marginBottom: 20 }}>
-            Sign in to create your own surveys!
-          </Typography>
-          <Typography>
-            If you're just here to take a survey <Link to="/">head to this page</Link>
-          </Typography>
-        </div>
+        <Typography style={{ textAlign: 'center' }} variant="display1" gutterBottom>
+          Sign in to create your own surveys!
+        </Typography>
+
+        <Typography style={{ textAlign: 'center' }} color="textSecondary">
+          Hold up. I just want to{' '}
+          <Link to={getJoinSurveyPath()}>
+            <Typography>join a survey</Typography>
+          </Link>
+        </Typography>
 
         <div id="firebaseui-auth-container" />
       </div>

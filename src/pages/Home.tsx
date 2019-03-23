@@ -5,7 +5,7 @@ import { Typography, Button } from '@material-ui/core';
 
 import { State } from '../state/state';
 import Shell from '../components/Shell';
-import { getHostPath, getJoinPath } from '../utils/routeUtil';
+import { getHostPath, getJoinSurveyPath } from '../utils/routeUtil';
 
 const mapState = (state: State) => {
   return {
@@ -19,7 +19,7 @@ export default function Home() {
   // if user isn't signed in or they're signed is as anonymous
   // assume that they're just here to take a survey
   if (!user || user.isAnonymous) {
-    return <Redirect to={getJoinPath()} />;
+    return <Redirect to={getJoinSurveyPath()} />;
   }
 
   // if the user is logged in to a real account, ask if they want to host or participate
@@ -36,9 +36,9 @@ export default function Home() {
         }}
       >
         <Typography variant="display1">Nice to see you again.</Typography>
-        <Link style={{ textDecoration: 'none' }} to={getJoinPath()}>
+        <Link style={{ textDecoration: 'none' }} to={getJoinSurveyPath()}>
           <Button variant="contained" color="primary">
-            Take a survey
+            Join a survey
           </Button>
         </Link>
         <Link style={{ textDecoration: 'none' }} to={getHostPath()}>

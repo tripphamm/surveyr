@@ -10,7 +10,7 @@ import { auth } from '../services/firebaseService';
 import Loading from '../pages/Loading';
 import ErrorMessage from '../pages/ErrorMessage';
 import {
-  getJoinPath,
+  getJoinSurveyPath,
   getSurveyQuestionPath,
   getSurveyInstanceRoutesPath,
 } from '../utils/routeUtil';
@@ -43,9 +43,9 @@ export default function AnonymousAuthRoutes() {
       <Route
         exact
         path={`${match.path}`}
-        render={props => <Redirect {...props} to={getJoinPath()} />}
+        render={props => <Redirect {...props} to={getJoinSurveyPath()} />}
       />
-      <Route path={getJoinPath()} component={Join} />
+      <Route path={getJoinSurveyPath()} component={Join} />
       <Route path={getSurveyInstanceRoutesPath()} component={SurveyInstanceRoutes} />
 
       <Route path="*" component={NotFound} />
