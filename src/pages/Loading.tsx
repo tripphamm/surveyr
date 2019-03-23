@@ -1,6 +1,6 @@
 import React from 'react';
-import EmojiIcon from './EmojiIcon';
-import Shell from './Shell';
+import EmojiIcon from '../components/EmojiIcon';
+import Shell from '../components/Shell';
 
 export default function Loading() {
   return (

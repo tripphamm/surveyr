@@ -1,35 +1,21 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button, IconButton, ListItem, List, ListItemText } from '@material-ui/core';
-import { useMappedState, useDispatch } from 'redux-react-hook';
+import { RouteComponentProps } from 'react-router-dom';
 
-import Shell from '../../components/Shell';
-import useRouter from '../../hooks/useRouter';
-import { State } from '../../state/state';
-import { auth } from '../../services/firebaseService';
-import EmojiIcon from '../../components/EmojiIcon';
-import FloatingAddButton from '../../components/FloatingAddButton';
-import { subscribeToMySurveys } from '../../state/actions';
-import Loading from '../../components/Loading';
+import useRouter from '../hooks/useRouter';
 
-const mapState = (s: State) => {
-  return {
-    mySurveys: s.mySurveys.value,
-  };
-};
+import Shell from '../components/Shell';
+import EmojiIcon from '../components/EmojiIcon';
+import FloatingAddButton from '../components/FloatingAddButton';
 
-export default function HostHome() {
+import { auth } from '../services/firebaseService';
+import { NormalizedSurveys } from '../state/state';
+import { getSurveyPath, getCreateSurveyPath } from '../utils/routeUtil';
+
+export default function Surveys(props: RouteComponentProps & { surveys: NormalizedSurveys }) {
+  const { surveys } = props;
+
   const { history } = useRouter();
-  const dispatch = useDispatch();
-
-  const { mySurveys } = useMappedState(mapState);
-
-  useEffect(() => {
-    dispatch(subscribeToMySurveys());
-  }, [dispatch]);
-
-  if (mySurveys === undefined) {
-    return <Loading />;
-  }
 
   return (
     <Shell
@@ -45,7 +31,7 @@ export default function HostHome() {
       }
     >
       <List>
-        {Object.values(mySurveys)
+        {Object.values(surveys)
           .sort((a, b) => {
             // sort alphabetically by title
             const aT = a.title.toLowerCase();
@@ -59,7 +45,7 @@ export default function HostHome() {
             return 0;
           })
           .map((survey, i) => (
-            <ListItem key={i} onClick={() => history.push(`/host/surveys/${survey.id}`)}>
+            <ListItem key={i} onClick={() => history.push(getSurveyPath(survey.id))}>
               <ListItemText
                 secondary={`${Object.values(survey.questions).length} question${
                   Object.values(survey.questions).length === 1 ? '' : 's'
@@ -70,7 +56,7 @@ export default function HostHome() {
             </ListItem>
           ))}
       </List>
-      <FloatingAddButton onClick={() => history.push('/host/surveyEditor')} />
+      <FloatingAddButton onClick={() => history.push(getCreateSurveyPath())} />
     </Shell>
   );
 }

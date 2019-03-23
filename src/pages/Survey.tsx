@@ -12,41 +12,23 @@ import {
   ListItemText,
 } from '@material-ui/core';
 import { Clear } from '@material-ui/icons';
-import { useDispatch, useMappedState } from 'redux-react-hook';
-import { Redirect } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 
-import Shell from '../../components/Shell';
-import useRouter from '../../hooks/useRouter';
-import EmojiIcon from '../../components/EmojiIcon';
-import { State } from '../../state/state';
-import NotFound from '../NotFound';
-import { hostSurvey } from '../../state/actions';
+import Shell from '../components/Shell';
+import useRouter from '../hooks/useRouter';
+import EmojiIcon from '../components/EmojiIcon';
+import { NormalizedSurveys } from '../state/state';
+import NotFound from './NotFound';
+import { getPresentPath } from '../utils/routeUtil';
 
-const mapState = (state: State) => {
-  return {
-    mySurveys: state.mySurveys.value,
-    hostedSurvey: state.hostedSurvey.value,
-  };
-};
-
-export default function Survey() {
-  const dispatch = useDispatch();
+export default function Survey(props: RouteComponentProps & { surveys: NormalizedSurveys }) {
+  const { surveys } = props;
 
   const { history, match } = useRouter<{ surveyId: string }>();
   const { params } = match;
   const { surveyId } = params;
 
-  const { mySurveys, hostedSurvey } = useMappedState(mapState);
-
-  if (hostedSurvey !== undefined) {
-    return <Redirect to="/host/presentation" />;
-  }
-
-  if (mySurveys === undefined) {
-    return <Redirect to="/host/surveys" />;
-  }
-
-  const survey = mySurveys[surveyId];
+  const survey = surveys[surveyId];
 
   if (survey === undefined) {
     return <NotFound />;
@@ -60,7 +42,7 @@ export default function Survey() {
         </IconButton>
       }
       buttonRightComponent={
-        <IconButton color="inherit" onClick={() => history.push('/host/surveys')}>
+        <IconButton color="inherit" onClick={() => history.goBack()}>
           <Icon>
             <Clear />
           </Icon>
@@ -71,9 +53,7 @@ export default function Survey() {
           style={{ height: '100%', width: '100%' }}
           variant="contained"
           color="primary"
-          onClick={async () => {
-            await dispatch(hostSurvey(surveyId));
-          }}
+          onClick={() => history.push(getPresentPath(surveyId))}
         >
           Start
         </Button>

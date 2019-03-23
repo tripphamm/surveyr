@@ -15,14 +15,13 @@ import {
   ListItemSecondaryAction,
   ListItemText,
 } from '@material-ui/core';
-import { Clear, Add, Delete } from '@material-ui/icons';
-import { useDispatch } from 'redux-react-hook';
+import { Add, Delete, Clear } from '@material-ui/icons';
 
-import Shell from '../../components/Shell';
-import useRouter from '../../hooks/useRouter';
-import EmojiIcon from '../../components/EmojiIcon';
-import { saveSurvey } from '../../state/actions';
-import { UnsavedSurvey, Question, Answer } from '../../state/state';
+import useRouter from '../hooks/useRouter';
+import { UnsavedSurvey, Question, Answer } from '../state/state';
+import Shell from '../components/Shell';
+import EmojiIcon from '../components/EmojiIcon';
+import { getSurveysPath } from '../utils/routeUtil';
 
 const reduce = (state: UnsavedSurvey, action: { type: string; payload?: any }) => {
   // deep-clone the questions so that we can use destructive methods when updating the state
@@ -64,7 +63,7 @@ const reduce = (state: UnsavedSurvey, action: { type: string; payload?: any }) =
     case 'ADD_ANSWER':
       clonedQuestions[action.payload.questionIndex].possibleAnswers.push({
         id: uuidv4(),
-        value: 'sample answer',
+        value: '',
       });
       return {
         ...state,
@@ -73,8 +72,8 @@ const reduce = (state: UnsavedSurvey, action: { type: string; payload?: any }) =
     case 'ADD_QUESTION':
       clonedQuestions.push({
         id: uuidv4(),
-        value: 'Another question?',
-        possibleAnswers: [{ id: uuidv4(), value: 'answer' }],
+        value: '',
+        possibleAnswers: [{ id: uuidv4(), value: '' }],
       });
       return {
         ...state,
@@ -100,23 +99,17 @@ const reduce = (state: UnsavedSurvey, action: { type: string; payload?: any }) =
   }
 };
 
-export default function CreateSurvey() {
-  const [state, dispatchLocal] = useReducer<
+export default function SurveyEditor(props: {
+  initialSurveyData: UnsavedSurvey;
+  saveSurvey: (unsavedSurvey: UnsavedSurvey) => Promise<void>;
+}) {
+  const { initialSurveyData, saveSurvey } = props;
+
+  const [unsavedSurvey, dispatchLocal] = useReducer<
     React.Reducer<UnsavedSurvey, { type: string; payload?: any }>
-  >(reduce, {
-    title: '',
-    questions: [
-      {
-        id: uuidv4(),
-        value: 'Is this a sample question?',
-        possibleAnswers: [{ id: uuidv4(), value: 'yep' }],
-      },
-    ],
-  });
+  >(reduce, initialSurveyData);
 
-  const { title, questions } = state;
-
-  const dispatch = useDispatch();
+  const { title, questions } = unsavedSurvey;
 
   const { history } = useRouter();
 
@@ -140,8 +133,8 @@ export default function CreateSurvey() {
           variant="contained"
           color="primary"
           onClick={async () => {
-            await dispatch(saveSurvey({ title, questions }));
-            history.push('/host/surveys');
+            await saveSurvey(unsavedSurvey);
+            history.push(getSurveysPath());
           }}
           disabled={
             // has a title,

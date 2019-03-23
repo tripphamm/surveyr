@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import EmojiIcon from '../components/EmojiIcon';
 import Shell from '../components/Shell';
 
-export default function NotFound({
+export default function ErrorMessage({
   message,
   actionComponent,
 }: {
@@ -24,8 +24,9 @@ export default function NotFound({
           alignItems: 'center',
         }}
       >
-        <EmojiIcon emojiShortName=":thinking:" size={64} />
-        <Typography>{message || "We can't find what you're looking for"}</Typography>
+        <EmojiIcon emojiShortName=":grimacing:" size={64} />
+        <Typography>Well, this is embarrassing</Typography>
+        <Typography>{message || 'Something broke'}</Typography>
         {actionComponent ? (
           actionComponent
         ) : (

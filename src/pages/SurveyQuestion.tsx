@@ -10,55 +10,58 @@ import {
   Icon,
   IconButton,
 } from '@material-ui/core';
-import { useDispatch, useMappedState } from 'redux-react-hook';
+import { useMappedState } from 'redux-react-hook';
 import { Clear, RadioButtonUnchecked } from '@material-ui/icons';
 
-import Shell from '../../components/Shell';
-import EmojiIcon from '../../components/EmojiIcon';
-import useRouter from '../../hooks/useRouter';
-import { getSurvey, leaveSurvey, submitAnswer } from '../../state/actions';
-import { State, SurveyInstance } from '../../state/state';
-import Loading from '../../components/Loading';
-import { radioButtonIconSize } from '../../settings/magicNumbers';
+import Shell from '../components/Shell';
+import EmojiIcon from '../components/EmojiIcon';
+import useRouter from '../hooks/useRouter';
+import { radioButtonIconSize } from '../settings/magicNumbers';
+import useMyResponses from '../hooks/useMyResponses';
+import { State, SurveyInstance, NormalizedSurvey } from '../state/state';
+import Loading from './Loading';
+import ErrorMessage from './ErrorMessage';
 
-const mapState = (s: State) => {
+const mapState = (state: State) => {
   return {
-    // assume surveyInstance is defined since we won't render this component unless that's the case
-    surveyInstance: s.surveyInstance.value as SurveyInstance,
-    activeSurvey: s.activeSurvey.value,
-    activeSurveyLoading: s.activeSurvey.loading,
-    activeSurveyError: s.activeSurvey.errorCode,
-    participantAnswers: s.participantAnswers,
+    // we assume that user has a value since we shouldn't render this component otherwise
+    user: state.user.value!,
   };
 };
 
-export default function SurveyQuestion() {
+export default function SurveyQuestion(props: {
+  surveyInstance: SurveyInstance;
+  survey: NormalizedSurvey;
+}) {
+  const { surveyInstance, survey } = props;
+
   const [submission, setSubmission] = useState<{ submitting: boolean; value: null | string }>({
     submitting: false,
     value: null,
   });
+
+  const { user } = useMappedState(mapState);
   const { history } = useRouter();
-  const dispatch = useDispatch();
-  const { participantAnswers, surveyInstance, activeSurvey } = useMappedState(mapState);
 
-  const { surveyId } = surveyInstance;
-
-  useEffect(() => {
-    dispatch(getSurvey(surveyId));
-  }, [dispatch, surveyId]);
-
-  if (activeSurvey === undefined) {
-    return <Loading />;
-  }
-
-  const currentQuestion = activeSurvey.questions[surveyInstance.currentQuestionId];
+  const currentQuestion = survey.questions[surveyInstance.currentQuestionId];
 
   if (currentQuestion === undefined) {
+    // todo: log
     throw new Error("Current question doesn't exist in the survey");
   }
 
-  const answers = participantAnswers[surveyInstance.id] || {};
-  const currentAnswerId = answers[currentQuestion.id];
+  const [myResponses, submitAnswer] = useMyResponses(user.id, surveyInstance.id);
+
+  if (myResponses.loading) {
+    return <Loading />;
+  }
+
+  if (myResponses.errorCode !== undefined) {
+    return <ErrorMessage />;
+  }
+
+  // myResponses is not loading and has no error, so the value should exist
+  const currentResponse = myResponses.value![currentQuestion.id];
 
   return (
     <Shell
@@ -69,7 +72,7 @@ export default function SurveyQuestion() {
         </IconButton>
       }
       buttonRightComponent={
-        <IconButton color="inherit" onClick={() => dispatch(leaveSurvey())}>
+        <IconButton color="inherit" onClick={() => history.push('/')}>
           <Icon>
             <Clear />
           </Icon>
@@ -92,11 +95,15 @@ export default function SurveyQuestion() {
           <RadioGroup
             aria-label="Your answer"
             name={`question-${currentQuestion.id}-answers`}
-            value={currentAnswerId}
+            value={currentResponse ? currentResponse.answerId : undefined}
             onChange={async e => {
               const value = (e.target as HTMLInputElement).value;
               setSubmission({ submitting: true, value });
-              await dispatch(submitAnswer(surveyInstance.id, currentQuestion.id, value));
+              await submitAnswer({
+                ...currentResponse,
+                questionId: currentQuestion.id,
+                answerId: value,
+              });
               setSubmission({ submitting: false, value: null });
             }}
           >
@@ -107,7 +114,7 @@ export default function SurveyQuestion() {
                 value={answerId}
                 control={
                   <Radio
-                    checked={answerId === currentAnswerId}
+                    checked={currentResponse && answerId === currentResponse.answerId}
                     icon={
                       submission.submitting && answerId === submission.value ? (
                         <CircularProgress size={radioButtonIconSize} />
