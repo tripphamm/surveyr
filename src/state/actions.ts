@@ -421,7 +421,9 @@ export function joinSurvey(code: string) {
       // subscribe function returns unsubscribe
       unsubscribeFromSurveyInstance = firestore
         .collection('survey-instances')
-        .where('shareCode', '==', code)
+        // always uppercase code before sending because we only generate uppercase codes
+        // this is a hacky "ignore-case" impelementation
+        .where('shareCode', '==', code.toUpperCase())
         .onSnapshot(surveySnapshot => {
           try {
             if (surveySnapshot.size === 0) {
@@ -623,9 +625,11 @@ export function hostSurvey(surveyId: string) {
         // we can assume that the 'find' will come back with an element since the `number`
         // prop is coming from the index in the question array
         currentQuestionId: Object.values(survey.questions).find(q => q.number === 0)!.id,
-        acceptAnswers: false,
-        displayResults: false,
-        shareCode: uuidv4().slice(0, 4),
+        acceptAnswers: true,
+        showResults: true,
+        shareCode: uuidv4()
+          .slice(0, 4)
+          .toUpperCase(),
       });
 
       unsubscribeFromHostedSurvey = hostedSurvey.onSnapshot(snapshot => {

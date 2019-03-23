@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { Button, IconButton, Icon, Typography } from '@material-ui/core';
-import { Clear } from '@material-ui/icons';
+import { Button, IconButton, Icon, Typography, withTheme, Theme } from '@material-ui/core';
+import { Clear, ArrowBack, ArrowForward } from '@material-ui/icons';
 import { useDispatch, useMappedState } from 'redux-react-hook';
 import { Redirect } from 'react-router-dom';
 
@@ -11,6 +11,7 @@ import { State } from '../../state/state';
 import NotFound from '../NotFound';
 import { subscribeToSurveyAnswers, stopHostingSurvey } from '../../state/actions';
 import { firestore } from '../../services/firebaseService';
+import AnimatedBar from '../../components/AnimatedBar';
 
 const mapState = (state: State) => {
   return {
@@ -20,10 +21,12 @@ const mapState = (state: State) => {
   };
 };
 
-export default function Present() {
+function Present(props: { theme: Theme }) {
   const dispatch = useDispatch();
 
   const { history } = useRouter();
+
+  const { theme } = props;
 
   const { hostedSurvey, mySurveys, surveyAnswers } = useMappedState(mapState);
 
@@ -62,10 +65,9 @@ export default function Present() {
     }, {});
   }
 
-  console.log(responses);
-
   const responsesCount = Object.values(responses).reduce((acc, count) => acc + count, 0);
 
+  console.log(responses, hostedSurvey);
   return (
     <Shell
       title={`Srvy | ${hostedSurvey.shareCode}`}
@@ -90,7 +92,7 @@ export default function Present() {
       bottomBarComponent={
         <div style={{ height: '100%' }}>
           <Button
-            style={{ height: 'inherit', width: '25%' }}
+            style={{ height: 'inherit', width: '50%' }}
             variant="contained"
             color="primary"
             onClick={() => {
@@ -104,40 +106,10 @@ export default function Present() {
               }
             }}
           >
-            Back
+            <ArrowBack />
           </Button>
           <Button
-            style={{ height: 'inherit', width: '25%' }}
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              firestore
-                .collection('survey-instances')
-                .doc(hostedSurveyId)
-                .update({
-                  acceptAnswers: !hostedSurvey.acceptAnswers,
-                });
-            }}
-          >
-            Collect
-          </Button>
-          <Button
-            style={{ height: 'inherit', width: '25%' }}
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              firestore
-                .collection('survey-instances')
-                .doc(hostedSurveyId)
-                .update({
-                  showResults: !hostedSurvey.showResults,
-                });
-            }}
-          >
-            Results
-          </Button>
-          <Button
-            style={{ height: 'inherit', width: '25%' }}
+            style={{ height: 'inherit', width: '50%' }}
             variant="contained"
             color="primary"
             onClick={() => {
@@ -151,7 +123,7 @@ export default function Present() {
               }
             }}
           >
-            Next
+            <ArrowForward />
           </Button>
         </div>
       }
@@ -169,22 +141,38 @@ export default function Present() {
           textAlign: 'center',
         }}
       >
-        <Typography style={{ position: 'absolute', top: 10, left: 10 }} variant="display1">
+        <Typography
+          style={{ position: 'absolute', top: 10, left: 10 }}
+          variant="h5"
+          color="textSecondary"
+        >
           {hostedSurvey.shareCode}
+        </Typography>
+
+        <Typography
+          style={{ position: 'absolute', top: 10, right: 10 }}
+          variant="h5"
+          color="textSecondary"
+        >
+          {`${responsesCount} response${responsesCount !== 1 ? 's' : ''}`}
         </Typography>
 
         <Typography variant="h4">{currentQuestion.value}</Typography>
 
-        <Typography variant="display1">
-          {`${responsesCount} response${responsesCount !== 1 ? 's' : ''}`}
-        </Typography>
-
         {currentQuestion &&
           Object.values(currentQuestion.possibleAnswers).map(possibleAnswer => (
-            <div key={`presentation-answer-${possibleAnswer.id}`}>
-              <Typography>{possibleAnswer.value}</Typography>
+            <div key={`presentation-answer-${possibleAnswer.id}`} style={{ width: '100%' }}>
+              <Typography variant="h5">{possibleAnswer.value}</Typography>
               {hostedSurvey.showResults && (
-                <Typography>{responses[possibleAnswer.id] || 0}</Typography>
+                <AnimatedBar
+                  value={
+                    responsesCount > 0 && responses[possibleAnswer.id] !== undefined
+                      ? (100 * responses[possibleAnswer.id]) / responsesCount
+                      : 0
+                  }
+                  color={theme.palette.primary.main}
+                  borderColor={theme.palette.divider}
+                />
               )}
             </div>
           ))}
@@ -192,3 +180,5 @@ export default function Present() {
     </Shell>
   );
 }
+
+export default withTheme()(Present);
