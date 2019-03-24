@@ -1,0 +1,21 @@
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read: if request.auth.uid != null;
+    }
+    match /survey-responses/{surveyInstanceId}/answers/{responseId} {
+      allow create: if request.auth.uid == request.resource.data.userId;
+      allow update: if request.auth.uid == resource.data.userId;
+      // allow delete if user is the author of the survey instance
+      allow delete: if request.auth.uid == get(/databases/$(database)/documents/survey-instances/$(surveyInstanceId)).data.authorId;
+    }
+    match /surveys/{surveyId} {
+    	allow create: if request.auth.uid != null;
+      allow update, delete: if request.auth.uid == resource.data.authorId
+    }
+    match /survey-instances/{surveyInstanceId} {
+    	allow create: if request.auth.uid != null;
+      allow update, delete: if request.auth.uid == resource.data.authorId
+    }
+  }
+}
