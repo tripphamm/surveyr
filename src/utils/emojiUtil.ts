@@ -11,8 +11,8 @@ interface GetImageSrcByShortNameOptions {
 
 const perfOptimizedEmojiMap: { [shortName: string]: string } = {
   ':bar_chart:': 'https://cdn.jsdelivr.net/emojione/assets/4.5/png/64/1f4ca.png',
-  ':grimacing': 'https://cdn.jsdelivr.net/emojione/assets/4.5/png/64/1f62c.png',
-  ':thinking': 'https://cdn.jsdelivr.net/emojione/assets/4.5/png/64/1f914.png',
+  ':grimacing:': 'https://cdn.jsdelivr.net/emojione/assets/4.5/png/64/1f62c.png',
+  ':thinking:': 'https://cdn.jsdelivr.net/emojione/assets/4.5/png/64/1f914.png',
 };
 
 export function getImageSrcByShortName(
