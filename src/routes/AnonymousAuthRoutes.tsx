@@ -8,9 +8,14 @@ import NotFound from '../pages/NotFound';
 import { auth } from '../services/firebaseService';
 import Loading from '../pages/Loading';
 import ErrorMessage from '../pages/ErrorMessage';
-import { getJoinSurveyPath, getSurveyInstanceRoutesPath } from '../utils/routeUtil';
+import {
+  getJoinSurveyPath,
+  getSurveyInstanceRoutesPath,
+  getHowItWorksPath,
+} from '../utils/routeUtil';
 import Join from '../pages/Join';
 import SurveyInstanceRoutes from './SurveyInstanceRoutes';
+import HowItWorks from '../pages/HowItWorks';
 
 const mapState = (s: State) => {
   return {
@@ -41,6 +46,7 @@ export default function AnonymousAuthRoutes(props: RouteComponentProps) {
         render={props => <Redirect {...props} to={getJoinSurveyPath()} />}
       />
       <Route path={getJoinSurveyPath()} component={Join} />
+      <Route path={getHowItWorksPath()} component={HowItWorks} />
       <Route path={getSurveyInstanceRoutesPath()} component={SurveyInstanceRoutes} />
 
       <Route path="*" component={NotFound} />

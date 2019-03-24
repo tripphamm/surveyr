@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import Shell from '../components/Shell';
 import EmojiIcon from '../components/EmojiIcon';
 import useRouter from '../hooks/useRouter';
-import { getHostPath, getSurveyQuestionPath } from '../utils/routeUtil';
+import { getHostPath, getSurveyQuestionPath, getHowItWorksPath } from '../utils/routeUtil';
 
 export default function Join() {
   const urlParameters = new URLSearchParams(window.location.search);
@@ -38,6 +38,7 @@ export default function Join() {
     >
       <div
         style={{
+          position: 'relative',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
@@ -45,6 +46,11 @@ export default function Join() {
           alignItems: 'center',
         }}
       >
+        <div style={{ position: 'absolute', top: 0, left: 0 }}>
+          <Link to={getHowItWorksPath()}>
+            <Typography color="primary">{'What is Srvy.live?'}</Typography>
+          </Link>
+        </div>
         <div style={{ textAlign: 'center' }}>
           <Typography variant="display1">{'Hi.'}</Typography>
         </div>
@@ -56,7 +62,7 @@ export default function Join() {
           autoComplete="off"
         />
         <Link to={getHostPath()}>
-          <Typography>{'I want to host a survey'}</Typography>
+          <Typography color="primary">{'I want to host a survey'}</Typography>
         </Link>
       </div>
     </Shell>

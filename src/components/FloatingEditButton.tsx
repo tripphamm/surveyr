@@ -6,6 +6,7 @@ import {
   floatingActionButtonSize,
   floatingActionButtonOffsetBottom,
   floatingActionButtonOffsetRight,
+  floatingActionButtonBufferSize,
 } from '../settings/magicNumbers';
 
 export default function FloatingAddButton(props: FabProps) {
@@ -24,7 +25,7 @@ export default function FloatingAddButton(props: FabProps) {
       >
         <Edit />
       </Fab>
-      <div style={{ height: floatingActionButtonSize + 10 }} />
+      <div style={{ height: floatingActionButtonBufferSize }} />
     </>
   );
 }

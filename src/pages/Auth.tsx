@@ -82,7 +82,7 @@ export default function Auth() {
         <Typography style={{ textAlign: 'center' }} color="textSecondary">
           Hold up. I just want to{' '}
           <Link to={getJoinSurveyPath()}>
-            <Typography>join a survey</Typography>
+            <Typography color="primary">join a survey</Typography>
           </Link>
         </Typography>
 
