@@ -11,7 +11,6 @@ import { State, NormalizedSurveys } from '../state/state';
 import AnimatedBar from '../components/AnimatedBar';
 import { useMappedState } from 'redux-react-hook';
 import useHostedSurveyInstance from '../hooks/useHostedSurveyInstance';
-import useWhyDidYouUpdate from '../hooks/useWhyDidYouUpdate';
 import ErrorMessage from './ErrorMessage';
 import useSurveyResponses from '../hooks/useSurveyResponses';
 import { denormalizeSurvey } from '../utils/normalizationUtil';
@@ -25,8 +24,6 @@ const mapState = (state: State) => {
 
 function Present(props: RouteComponentProps & { theme: Theme; surveys: NormalizedSurveys }) {
   const { theme, surveys } = props;
-
-  useWhyDidYouUpdate('Present', props);
 
   const { user } = useMappedState(mapState);
 
@@ -61,13 +58,13 @@ function Present(props: RouteComponentProps & { theme: Theme; surveys: Normalize
 
   const currentQuestionId = survey.questions[0].id;
 
-  const [hostedSurvey, updateHostedSurvey] = useHostedSurveyInstance(
+  const [hostedSurvey, updateHostedSurvey, deleteHostedSurvey] = useHostedSurveyInstance(
     user.id,
     surveyId,
     currentQuestionId,
   );
 
-  const surveyResponses = useSurveyResponses(
+  const [surveyResponses, deleteSurveyResponses] = useSurveyResponses(
     hostedSurvey.value ? hostedSurvey.value.id : undefined,
   );
 
@@ -114,7 +111,15 @@ function Present(props: RouteComponentProps & { theme: Theme; surveys: Normalize
         </IconButton>
       }
       buttonRightComponent={
-        <IconButton color="inherit" onClick={history.goBack}>
+        <IconButton
+          color="inherit"
+          onClick={async () => {
+            history.goBack();
+
+            await deleteSurveyResponses();
+            await deleteHostedSurvey();
+          }}
+        >
           <Icon>
             <Clear />
           </Icon>

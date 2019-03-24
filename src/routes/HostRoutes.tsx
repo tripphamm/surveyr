@@ -27,7 +27,7 @@ export default function HostRoutes(props: { user: User }) {
 
   const { match } = useRouter();
 
-  const [mySurveys, saveSurvey] = useMySurveys(user.id);
+  const [mySurveys, saveSurvey, deleteSurvey] = useMySurveys(user.id);
 
   if (mySurveys.loading) {
     return <Loading />;
@@ -64,7 +64,12 @@ export default function HostRoutes(props: { user: User }) {
         path={getEditSurveyPath()}
         exact
         render={props => (
-          <EditSurvey {...props} surveys={mySurveys.value!} saveSurvey={saveSurvey} />
+          <EditSurvey
+            {...props}
+            surveys={mySurveys.value!}
+            saveSurvey={saveSurvey}
+            deleteSurvey={deleteSurvey}
+          />
         )}
       />
       <Route

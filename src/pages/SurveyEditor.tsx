@@ -21,7 +21,6 @@ import useRouter from '../hooks/useRouter';
 import { UnsavedSurvey, Question, Answer } from '../state/state';
 import Shell from '../components/Shell';
 import EmojiIcon from '../components/EmojiIcon';
-import { getSurveysPath } from '../utils/routeUtil';
 
 const reduce = (state: UnsavedSurvey, action: { type: string; payload?: any }) => {
   // deep-clone the questions so that we can use destructive methods when updating the state
@@ -102,8 +101,9 @@ const reduce = (state: UnsavedSurvey, action: { type: string; payload?: any }) =
 export default function SurveyEditor(props: {
   initialSurveyData: UnsavedSurvey;
   onSave: (unsavedSurvey: UnsavedSurvey) => Promise<void>;
+  onDelete?: (surveyId: string) => Promise<void>;
 }) {
-  const { initialSurveyData, onSave } = props;
+  const { initialSurveyData, onSave, onDelete } = props;
 
   const [unsavedSurvey, dispatchLocal] = useReducer<
     React.Reducer<UnsavedSurvey, { type: string; payload?: any }>
@@ -247,7 +247,7 @@ export default function SurveyEditor(props: {
           </CardActions>
         </Card>
       ))}
-      <Card>
+      <Card style={{ marginBottom: 15 }}>
         <CardContent>
           <div style={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
             <IconButton onClick={() => dispatchLocal({ type: 'ADD_QUESTION' })}>
@@ -256,6 +256,16 @@ export default function SurveyEditor(props: {
           </div>
         </CardContent>
       </Card>
+      {unsavedSurvey.id !== undefined && typeof onDelete === 'function' && (
+        <Button
+          fullWidth
+          variant="contained"
+          color="secondary"
+          onClick={() => onDelete(unsavedSurvey.id!)}
+        >
+          Delete
+        </Button>
+      )}
     </Shell>
   );
 }

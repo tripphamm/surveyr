@@ -22,10 +22,6 @@ export default function SurveyInstanceRoutes() {
   const surveyInstance = useSurveyInstance(shareCode);
   const survey = useSurvey(surveyInstance.value ? surveyInstance.value.surveyId : undefined);
 
-  if (surveyInstance.loading || survey.loading) {
-    return <Loading />;
-  }
-
   if (
     surveyInstance.errorCode === ErrorCode.SURVEY_INSTANCE_NOT_FOUND ||
     survey.errorCode === ErrorCode.SURVEY_DOES_NOT_EXIST
@@ -37,6 +33,11 @@ export default function SurveyInstanceRoutes() {
     return (
       <ErrorMessage message="Uh oh. Looks like we goofed up bad. Somebody please tell the host to restart the survey." />
     );
+  }
+
+  console.log(surveyInstance);
+  if (surveyInstance.loading || survey.loading) {
+    return <Loading />;
   }
 
   // some other error; render the default error component

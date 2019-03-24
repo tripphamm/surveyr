@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { firestore } from '../services/firebaseService';
 import { Subscribable, SurveyResponsesByQuestionId, SurveyResponse } from '../state/state';
 
-export default function useSurveyResponses(surveyInstanceId?: string) {
+export default function useSurveyResponses(
+  surveyInstanceId?: string,
+): [Subscribable<SurveyResponsesByQuestionId>, () => Promise<void>] {
   const [surveyResponses, setsurveyResponses] = useState<Subscribable<SurveyResponsesByQuestionId>>(
     {
       loading: true,
@@ -59,5 +61,21 @@ export default function useSurveyResponses(surveyInstanceId?: string) {
     return unsubscribe;
   }, [surveyInstanceId]);
 
-  return surveyResponses;
+  const deleteSurveyResponses = useCallback(async () => {
+    const surveyResponsesSnapshot = await firestore
+      .collection('survey-responses')
+      .doc(surveyInstanceId)
+      .collection('answers')
+      .get();
+
+    const batch = firestore.batch();
+
+    surveyResponsesSnapshot.docs.forEach(surveyResponseDoc => {
+      batch.delete(surveyResponseDoc.ref);
+    });
+
+    batch.commit();
+  }, [surveyInstanceId]);
+
+  return [surveyResponses, deleteSurveyResponses];
 }

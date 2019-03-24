@@ -6,7 +6,11 @@ import { normalizeSurvey } from '../utils/normalizationUtil';
 
 export default function useMySurveys(
   userId: string,
-): [Subscribable<NormalizedSurveys>, (survey: UnsavedSurvey) => Promise<void>] {
+): [
+  Subscribable<NormalizedSurveys>,
+  (survey: UnsavedSurvey) => Promise<void>,
+  (surveyId: string) => Promise<void>
+] {
   const [mySurveys, setMySurveys] = useState<Subscribable<NormalizedSurveys>>({
     loading: true,
   });
@@ -61,5 +65,12 @@ export default function useMySurveys(
     [userId],
   );
 
-  return [mySurveys, saveSurvey];
+  const deleteSurvey = async (surveyId: string) => {
+    await firestore
+      .collection('surveys')
+      .doc(surveyId)
+      .delete();
+  };
+
+  return [mySurveys, saveSurvey, deleteSurvey];
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, IconButton, ListItem, List, ListItemText } from '@material-ui/core';
-import { RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps, Link } from 'react-router-dom';
 
 import useRouter from '../hooks/useRouter';
 
@@ -45,15 +45,21 @@ export default function Surveys(props: RouteComponentProps & { surveys: Normaliz
             return 0;
           })
           .map((survey, i) => (
-            <ListItem key={i} onClick={() => history.push(getSurveyPath(survey.id))}>
-              <ListItemText
-                secondary={`${Object.values(survey.questions).length} question${
-                  Object.values(survey.questions).length === 1 ? '' : 's'
-                }`}
-              >
-                {survey.title}
-              </ListItemText>
-            </ListItem>
+            <Link
+              key={`survey-${i}`}
+              style={{ textDecoration: 'none' }}
+              to={getSurveyPath(survey.id)}
+            >
+              <ListItem>
+                <ListItemText
+                  secondary={`${Object.values(survey.questions).length} question${
+                    Object.values(survey.questions).length === 1 ? '' : 's'
+                  }`}
+                >
+                  {survey.title}
+                </ListItemText>
+              </ListItem>
+            </Link>
           ))}
       </List>
       <FloatingAddButton onClick={() => history.push(getCreateSurveyPath())} />

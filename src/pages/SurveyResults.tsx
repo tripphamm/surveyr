@@ -22,7 +22,7 @@ function SurveyResults(props: {
 
   const currentQuestion = survey.questions[surveyInstance.currentQuestionId];
 
-  const surveyResponses = useSurveyResponses(surveyInstance.id);
+  const [surveyResponses] = useSurveyResponses(surveyInstance.id);
 
   if (surveyResponses.loading) {
     return <Loading />;

@@ -1,20 +1,21 @@
 import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps, Redirect } from 'react-router-dom';
 
 import useRouter from '../hooks/useRouter';
 import { UnsavedSurvey, NormalizedSurveys } from '../state/state';
 import SurveyEditor from './SurveyEditor';
 import NotFound from './NotFound';
 import { denormalizeSurvey } from '../utils/normalizationUtil';
-import { getSurveyPath } from '../utils/routeUtil';
+import { getSurveyPath, getSurveysPath } from '../utils/routeUtil';
 
 export default function EditSurvey(
   props: RouteComponentProps & {
     surveys: NormalizedSurveys;
     saveSurvey: (unsavedSurvey: UnsavedSurvey) => Promise<void>;
+    deleteSurvey: (surveyId: string) => Promise<void>;
   },
 ) {
-  const { surveys, saveSurvey } = props;
+  const { surveys, saveSurvey, deleteSurvey } = props;
 
   const { match, history } = useRouter<{ surveyId: string }>();
   const { params } = match;
@@ -23,7 +24,7 @@ export default function EditSurvey(
   const survey = surveys[surveyId];
 
   if (survey === undefined) {
-    return <NotFound />;
+    return <Redirect to={getSurveysPath()} />;
   }
 
   const initialSurveyData: UnsavedSurvey = denormalizeSurvey(survey);
@@ -34,6 +35,9 @@ export default function EditSurvey(
       onSave={async (unsavedSurvey: UnsavedSurvey) => {
         await saveSurvey(unsavedSurvey);
         history.push(getSurveyPath(surveyId));
+      }}
+      onDelete={async (surveyId: string) => {
+        await deleteSurvey(surveyId);
       }}
     />
   );

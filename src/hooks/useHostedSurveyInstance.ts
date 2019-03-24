@@ -11,7 +11,8 @@ export default function useHostedSurveyInstance(
   firstQuestionId: string,
 ): [
   Subscribable<SurveyInstance>,
-  (surveyInstanceUpdate: Partial<SurveyInstance>) => Promise<void>
+  (surveyInstanceUpdate: Partial<SurveyInstance>) => Promise<void>,
+  () => Promise<void>
 ] {
   const [createHostedSurveyResult, setCreatedHostedSurveyResult] = useState<
     Loadable<{ shareCode: string; ref: firebase.firestore.DocumentReference }>
@@ -69,6 +70,17 @@ export default function useHostedSurveyInstance(
     [hostedSurvey.value],
   );
 
+  const deleteHostedSurvey = useCallback(async () => {
+    if (hostedSurvey.value === undefined) {
+      return;
+    }
+
+    await firestore
+      .collection('survey-instances')
+      .doc(hostedSurvey.value.id)
+      .delete();
+  }, [hostedSurvey.value]);
+
   return [
     {
       loading: createHostedSurveyResult.loading || hostedSurvey.loading,
@@ -76,5 +88,6 @@ export default function useHostedSurveyInstance(
       value: hostedSurvey.value,
     },
     updateHostedSurvey,
+    deleteHostedSurvey,
   ];
 }
