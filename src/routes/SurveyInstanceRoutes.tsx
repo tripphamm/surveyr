@@ -35,7 +35,6 @@ export default function SurveyInstanceRoutes() {
     );
   }
 
-  console.log(surveyInstance);
   if (surveyInstance.loading || survey.loading) {
     return <Loading />;
   }
