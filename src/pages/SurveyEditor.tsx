@@ -22,10 +22,13 @@ import { UnsavedSurvey, Question, Answer } from '../state/state';
 import Shell from '../components/Shell';
 import EmojiIcon from '../components/EmojiIcon';
 
-const reduce = (state: UnsavedSurvey, action: { type: string; payload?: any }) => {
+const reduce = (
+  state: { survey: UnsavedSurvey; autoFocusedId?: string },
+  action: { type: string; payload?: any },
+) => {
   // deep-clone the questions so that we can use destructive methods when updating the state
   // without mutating the in-use state
-  const clonedQuestions = state.questions.reduce<Question[]>((questionsClone, question) => {
+  const clonedQuestions = state.survey.questions.reduce<Question[]>((questionsClone, question) => {
     const clonedAnswers = question.possibleAnswers.reduce<Answer[]>((answersClone, answer) => {
       answersClone.push({ ...answer });
       return answersClone;
@@ -43,13 +46,19 @@ const reduce = (state: UnsavedSurvey, action: { type: string; payload?: any }) =
     case 'SET_TITLE':
       return {
         ...state,
-        title: action.payload,
+        survey: {
+          ...state.survey,
+          title: action.payload,
+        },
       };
     case 'SET_QUESTION':
       clonedQuestions[action.payload.questionIndex].value = action.payload.value;
       return {
         ...state,
-        questions: clonedQuestions,
+        survey: {
+          ...state.survey,
+          questions: clonedQuestions,
+        },
       };
     case 'SET_ANSWER':
       clonedQuestions[action.payload.questionIndex].possibleAnswers[
@@ -57,26 +66,39 @@ const reduce = (state: UnsavedSurvey, action: { type: string; payload?: any }) =
       ].value = action.payload.value;
       return {
         ...state,
-        questions: clonedQuestions,
+        survey: {
+          ...state.survey,
+          questions: clonedQuestions,
+        },
       };
     case 'ADD_ANSWER':
+      const newAnswerId = uuidv4();
       clonedQuestions[action.payload.questionIndex].possibleAnswers.push({
-        id: uuidv4(),
+        id: newAnswerId,
         value: '',
       });
       return {
         ...state,
-        questions: clonedQuestions,
+        autoFocusedId: newAnswerId,
+        survey: {
+          ...state.survey,
+          questions: clonedQuestions,
+        },
       };
     case 'ADD_QUESTION':
+      const newQuestionId = uuidv4();
       clonedQuestions.push({
-        id: uuidv4(),
+        id: newQuestionId,
         value: '',
         possibleAnswers: [{ id: uuidv4(), value: '' }],
       });
       return {
         ...state,
-        questions: clonedQuestions,
+        autoFocusedId: newQuestionId,
+        survey: {
+          ...state.survey,
+          questions: clonedQuestions,
+        },
       };
     case 'REMOVE_ANSWER':
       clonedQuestions[action.payload.questionIndex].possibleAnswers.splice(
@@ -85,13 +107,19 @@ const reduce = (state: UnsavedSurvey, action: { type: string; payload?: any }) =
       );
       return {
         ...state,
-        questions: clonedQuestions,
+        survey: {
+          ...state.survey,
+          questions: clonedQuestions,
+        },
       };
     case 'REMOVE_QUESTION':
       clonedQuestions.splice(action.payload.questionIndex, 1);
       return {
         ...state,
-        questions: clonedQuestions,
+        survey: {
+          ...state.survey,
+          questions: clonedQuestions,
+        },
       };
     default:
       return state;
@@ -105,9 +133,14 @@ export default function SurveyEditor(props: {
 }) {
   const { initialSurveyData, onSave, onDelete } = props;
 
-  const [unsavedSurvey, dispatchLocal] = useReducer<
-    React.Reducer<UnsavedSurvey, { type: string; payload?: any }>
-  >(reduce, initialSurveyData);
+  const [state, dispatchLocal] = useReducer<
+    React.Reducer<
+      { survey: UnsavedSurvey; autoFocusedId?: string },
+      { type: string; payload?: any }
+    >
+  >(reduce, { survey: initialSurveyData, autoFocusedId: undefined });
+
+  const { survey: unsavedSurvey, autoFocusedId } = state;
 
   const { title, questions } = unsavedSurvey;
 
@@ -159,6 +192,7 @@ export default function SurveyEditor(props: {
       </Typography>
       <TextField
         fullWidth
+        autoFocus={autoFocusedId === undefined}
         variant="outlined"
         label="Survey title"
         value={title}
@@ -183,6 +217,7 @@ export default function SurveyEditor(props: {
             title={
               <TextField
                 fullWidth
+                autoFocus={autoFocusedId === question.id}
                 variant="outlined"
                 label={`Question ${qIndex + 1}`}
                 value={question.value}
@@ -204,6 +239,7 @@ export default function SurveyEditor(props: {
                       fullWidth
                       variant="outlined"
                       label={`Answer ${aIndex + 1}`}
+                      autoFocus={autoFocusedId === answer.id}
                       value={answer.value}
                       onChange={e => {
                         dispatchLocal({
