@@ -3,10 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@firebase/app": "^0.3.13",
     "@firebase/app-types": "^0.3.6",
-    "@firebase/auth": "^0.9.6",
-    "@firebase/firestore": "^1.1.1",
     "@firebase/util": "^0.2.10",
     "@material-ui/core": "^3.9.2",
     "@material-ui/icons": "^3.0.2",
