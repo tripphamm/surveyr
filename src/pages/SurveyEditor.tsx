@@ -1,21 +1,21 @@
 import React, { useReducer } from 'react';
 import uuidv4 from 'uuid/v4';
-import {
-  Button,
-  IconButton,
-  Icon,
-  TextField,
-  Typography,
-  Card,
-  CardContent,
-  CardActions,
-  CardHeader,
-  List,
-  ListItem,
-  ListItemSecondaryAction,
-  ListItemText,
-} from '@material-ui/core';
-import { Add, Delete, Clear } from '@material-ui/icons';
+import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import Icon from '@material-ui/core/Icon';
+import Typography from '@material-ui/core/Typography';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import CardHeader from '@material-ui/core/CardHeader';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import TextField from '@material-ui/core/TextField';
+import CardActions from '@material-ui/core/CardActions';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import Add from '@material-ui/icons/Add';
+import Delete from '@material-ui/icons/Delete';
+import Clear from '@material-ui/icons/Clear';
 
 import useRouter from '../hooks/useRouter';
 import { UnsavedSurvey, Question, Answer } from '../state/state';

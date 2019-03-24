@@ -1,7 +1,6 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/auth';
-import firebaseui from 'firebaseui';
 
 const config = {
   apiKey: 'AIzaSyD1Yyk72-U54xD2t9YqZT-q7OpBGU3-V3g',
@@ -38,5 +37,3 @@ export function getUIConfig() {
     privacyPolicyUrl: '/privacy',
   };
 }
-
-export const ui = new firebaseui.auth.AuthUI(firebase.auth());

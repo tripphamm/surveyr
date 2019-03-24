@@ -1,6 +1,10 @@
 import React from 'react';
-import { IconButton, Icon, Typography, withTheme, Theme } from '@material-ui/core';
-import { Clear } from '@material-ui/icons';
+import withTheme from '@material-ui/core/styles/withTheme';
+import { Theme } from '@material-ui/core/styles/createMuiTheme';
+import Typography from '@material-ui/core/Typography';
+import Icon from '@material-ui/core/Icon';
+import IconButton from '@material-ui/core/IconButton';
+import Clear from '@material-ui/icons/Clear';
 
 import Shell from '../components/Shell';
 import useRouter from '../hooks/useRouter';

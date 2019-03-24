@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Fab, { FabProps } from '@material-ui/core/Fab';
-import AddIcon from '@material-ui/icons/Add';
+import Add from '@material-ui/icons/Add';
 
 import {
   floatingActionButtonSize,
@@ -22,7 +22,7 @@ export default function FloatingAddButton(props: FabProps) {
           width: floatingActionButtonSize,
         }}
       >
-        <AddIcon />
+        <Add />
       </Fab>
       <div style={{ height: floatingActionButtonSize + 10 }} />
     </>

@@ -1,5 +1,6 @@
 import React from 'react';
-import { IconButton, Typography } from '@material-ui/core';
+import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
 
 import useRouter from '../hooks/useRouter';
 import Shell from '../components/Shell';

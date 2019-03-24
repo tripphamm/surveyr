@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import {
-  CircularProgress,
-  Typography,
-  FormLabel,
-  FormControl,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Icon,
-  IconButton,
-} from '@material-ui/core';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Typography from '@material-ui/core/Typography';
+import FormLabel from '@material-ui/core/FormLabel';
+import FormControl from '@material-ui/core/FormControl';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Radio from '@material-ui/core/Radio';
+import Icon from '@material-ui/core/Icon';
+import IconButton from '@material-ui/core/IconButton';
+import Clear from '@material-ui/icons/Clear';
+import RadioButtonUnchecked from '@material-ui/icons/RadioButtonUnchecked';
 import { useMappedState } from 'redux-react-hook';
-import { Clear, RadioButtonUnchecked } from '@material-ui/icons';
 
 import Shell from '../components/Shell';
 import EmojiIcon from '../components/EmojiIcon';

@@ -1,13 +1,15 @@
-import React from 'react';
-import { Route, Redirect, Switch } from 'react-router-dom';
+import React, { Suspense } from 'react';
+import { Route, Redirect, Switch, RouteComponentProps } from 'react-router-dom';
 import { useMappedState } from 'redux-react-hook';
 
 import useRouter from '../hooks/useRouter';
 import { State } from '../state/state';
-import Auth from '../pages/Auth';
 import HostRoutes from './HostRoutes';
 import NotFound from '../pages/NotFound';
 import ErrorMessage from '../pages/ErrorMessage';
+import Loading from '../pages/Loading';
+
+const Auth = React.lazy(() => import('../pages/Auth'));
 
 const mapState = (s: State) => {
   return {
@@ -16,7 +18,7 @@ const mapState = (s: State) => {
   };
 };
 
-export default function FullAuthRoutes() {
+export default function FullAuthRoutes(props: RouteComponentProps) {
   const { match } = useRouter();
   const { user } = useMappedState(mapState);
 
@@ -25,7 +27,11 @@ export default function FullAuthRoutes() {
   }
 
   if (user === null || user.isAnonymous) {
-    return <Auth />;
+    return (
+      <Suspense fallback={<Loading />}>
+        <Auth />
+      </Suspense>
+    );
   }
 
   return (

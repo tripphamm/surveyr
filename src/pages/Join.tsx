@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { Typography, Button, IconButton, TextField } from '@material-ui/core';
+import TextField from '@material-ui/core/TextField';
+import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 import { Link } from 'react-router-dom';
 
 import Shell from '../components/Shell';
@@ -47,6 +50,7 @@ export default function Join() {
         </div>
         <TextField
           variant="outlined"
+          label="Survey code"
           value={shareCode}
           onChange={e => setShareCode(e.target.value)}
           autoComplete="off"

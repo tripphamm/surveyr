@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@firebase/app": "^0.3.13",
     "@firebase/app-types": "^0.3.6",
+    "@firebase/auth": "^0.9.6",
+    "@firebase/firestore": "^1.1.1",
     "@firebase/util": "^0.2.10",
     "@material-ui/core": "^3.9.2",
     "@material-ui/icons": "^3.0.2",
@@ -17,7 +20,6 @@
     "@types/uuid": "^3.4.4",
     "@typescript-eslint/eslint-plugin": "^1.4.2",
     "@typescript-eslint/parser": "^1.4.2",
-    "emojione": "^4.5.0",
     "eslint": "5.12.0",
     "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-import": "^2.16.0",
@@ -40,10 +42,12 @@
     "redux-devtools-extension": "^2.13.8",
     "redux-react-hook": "^3.2.1",
     "redux-thunk": "^2.3.0",
+    "source-map-explorer": "^1.8.0",
     "typescript": "3.3.3333",
     "uuid": "^3.3.2"
   },
   "scripts": {
+    "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

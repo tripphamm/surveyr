@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react';
-import { Typography, IconButton } from '@material-ui/core';
+import React, { useEffect, useMemo } from 'react';
+import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
 import { useMappedState } from 'redux-react-hook';
 import { Link } from 'react-router-dom';
+import firebaseui from 'firebaseui';
 
-import { auth, getUIConfig, ui } from '../services/firebaseService';
+import { auth, getUIConfig } from '../services/firebaseService';
 import Shell from '../components/Shell';
 import { State } from '../state/state';
 import EmojiIcon from '../components/EmojiIcon';
@@ -26,9 +28,11 @@ export default function Auth() {
     auth.signOut();
   }
 
+  const ui = useMemo(() => new firebaseui.auth.AuthUI(auth), []);
+
   useEffect(() => {
     ui.start('#firebaseui-auth-container', getUIConfig());
-  }, []);
+  }, [ui]);
 
   if (ui.isPendingRedirect()) {
     // if this is just the flash of UI before the auth redirect, we want to show the loading screen

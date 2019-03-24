@@ -1,7 +1,8 @@
 import React from 'react';
 import { Redirect, Link } from 'react-router-dom';
 import { useMappedState } from 'redux-react-hook';
-import { Typography, Button } from '@material-ui/core';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
 
 import { State } from '../state/state';
 import Shell from '../components/Shell';

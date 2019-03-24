@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { getImageSrcByUnicodeOrShortName } from '../utils/emojiUtil';
+import { getImageSrcByShortName } from '../utils/emojiUtil';
 
 interface EmojiIconProps {
   emojiShortName: string;
@@ -29,7 +29,7 @@ const EmojiIcon: React.FunctionComponent<EmojiIconProps> = (props: EmojiIconProp
         height: size,
         width: size,
       }}
-      src={getImageSrcByUnicodeOrShortName(emojiShortName, { size: emojiImageSize })}
+      src={getImageSrcByShortName(emojiShortName, { size: emojiImageSize })}
       alt={emojiShortName}
     />
   );
