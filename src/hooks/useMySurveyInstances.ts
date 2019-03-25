@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { Loadable, SurveyInstance } from '../state/state';
 import { firestore } from '../services/firebaseService';
@@ -8,8 +8,18 @@ export default function useMySurveyInstances(
   userId: string,
 ): [
   Loadable<NormalizedSurveyInstances>,
-  (surveyInstanceId: string, surveyInstanceUpdate: Partial<SurveyInstance>) => Promise<void>,
-  (surveyInstanceId: string) => Promise<void>
+  {
+    addSurveyInstance: (
+      surveyId: string,
+      initialQuestionId: string,
+      shareCode: string,
+    ) => Promise<void>;
+    updateSurveyInstance: (
+      surveyInstanceId: string,
+      surveyInstanceUpdate: Partial<SurveyInstance>,
+    ) => Promise<void>;
+    deleteSurveyInstance: (surveyInstanceId: string) => Promise<void>;
+  }
 ] {
   const [mySurveyInstances, setMySurveyInstances] = useState<Loadable<NormalizedSurveyInstances>>({
     loading: true,
@@ -42,14 +52,42 @@ export default function useMySurveyInstances(
       });
   }, [userId]);
 
+  const addSurveyInstance = useCallback(
+    async (surveyId: string, initialQuestionId: string, shareCode: string) => {
+      try {
+        await firestore.collection('survey-instances').add({
+          authorId: userId,
+          surveyId: surveyId,
+          currentQuestionId: initialQuestionId,
+          acceptAnswers: true,
+          showResults: true,
+          shareCode,
+        });
+      } catch (error) {
+        setMySurveyInstances({
+          ...mySurveyInstances,
+          errorCode: error.toString(),
+        });
+      }
+    },
+    [mySurveyInstances, userId],
+  );
+
   const updateSurveyInstance = async (
     surveyInstanceId: string,
     surveyInstanceUpdate: Partial<SurveyInstance>,
   ) => {
-    await firestore
-      .collection('survey-instances')
-      .doc(surveyInstanceId)
-      .update(surveyInstanceUpdate);
+    try {
+      await firestore
+        .collection('survey-instances')
+        .doc(surveyInstanceId)
+        .update(surveyInstanceUpdate);
+    } catch (error) {
+      setMySurveyInstances({
+        ...mySurveyInstances,
+        errorCode: error.toString(),
+      });
+    }
   };
 
   const deleteSurveyInstance = async (surveyInstanceId: string) => {
@@ -72,5 +110,5 @@ export default function useMySurveyInstances(
     batch.commit();
   };
 
-  return [mySurveyInstances, updateSurveyInstance, deleteSurveyInstance];
+  return [mySurveyInstances, { addSurveyInstance, updateSurveyInstance, deleteSurveyInstance }];
 }

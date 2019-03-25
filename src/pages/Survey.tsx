@@ -12,7 +12,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Clear from '@material-ui/icons/Clear';
 import Delete from '@material-ui/icons/Delete';
-import { RouteComponentProps, Link } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import uuidv4 from 'uuid/v4';
 
 import Shell from '../components/Shell';
@@ -21,19 +21,22 @@ import EmojiIcon from '../components/EmojiIcon';
 import FloatingEditButton from '../components/FloatingEditButton';
 import { NormalizedSurveys, User, NormalizedSurveyInstances } from '../state/state';
 import NotFound from './NotFound';
-import { getPresentSurveyPath, getEditSurveyPath, getSurveysPath } from '../utils/routeUtil';
-import { firestore } from '../services/firebaseService';
+import { getSurveyPresenterInfoPath, getEditSurveyPath, getSurveysPath } from '../utils/routeUtil';
 import ErrorMessage from './ErrorMessage';
 
 export default function Survey(
   props: RouteComponentProps & {
     surveys: NormalizedSurveys;
     surveyInstances: NormalizedSurveyInstances;
+    addSurveyInstance: (
+      surveyId: string,
+      initialQuestionId: string,
+      shareCode: string,
+    ) => Promise<void>;
     deleteSurveyInstance: (surveyInstanceId: string) => Promise<void>;
-    user: User;
   },
 ) {
-  const { surveys, surveyInstances, deleteSurveyInstance, user } = props;
+  const { surveys, surveyInstances, addSurveyInstance, deleteSurveyInstance } = props;
 
   const { history, match } = useRouter<{ surveyId: string }>();
   const { params } = match;
@@ -75,16 +78,13 @@ export default function Survey(
           variant="contained"
           color="primary"
           onClick={async () => {
-            await firestore.collection('survey-instances').add({
-              authorId: user.id,
-              surveyId: surveyId,
-              currentQuestionId: defaultQuestion.id,
-              acceptAnswers: true,
-              showResults: true,
-              shareCode: uuidv4()
-                .slice(0, 4)
-                .toUpperCase(),
-            });
+            const shareCode = uuidv4()
+              .slice(0, 4)
+              .toUpperCase();
+
+            history.push(getSurveyPresenterInfoPath(shareCode));
+
+            addSurveyInstance(survey.id, defaultQuestion.id, shareCode);
           }}
         >
           Start
@@ -102,7 +102,7 @@ export default function Survey(
               {surveyInstancesForThisSurvey.map((surveyInstance, i) => (
                 <ListItem
                   key={`survey-instance-${i}`}
-                  onClick={() => history.push(getPresentSurveyPath(surveyInstance.shareCode))}
+                  onClick={() => history.push(getSurveyPresenterInfoPath(surveyInstance.shareCode))}
                 >
                   <ListItemText>{surveyInstance.shareCode}</ListItemText>
                   <ListItemSecondaryAction>

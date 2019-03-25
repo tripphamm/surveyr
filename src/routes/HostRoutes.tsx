@@ -10,7 +10,8 @@ import Surveys from '../pages/Surveys';
 import Survey from '../pages/Survey';
 import CreateSurvey from '../pages/CreateSurvey';
 import EditSurvey from '../pages/EditSurvey';
-import Present from '../pages/Present';
+import Presenter from '../pages/Presenter';
+import PresenterInfo from '../pages/PresenterInfo';
 import Loading from '../pages/Loading';
 import ErrorMessage from '../pages/ErrorMessage';
 import NotFound from '../pages/NotFound';
@@ -18,8 +19,9 @@ import {
   getSurveysPath,
   getCreateSurveyPath,
   getEditSurveyPath,
-  getPresentSurveyPath,
   getSurveyPath,
+  getSurveyPresenterPath,
+  getSurveyPresenterInfoPath,
 } from '../utils/routeUtil';
 import useMySurveyInstances from '../hooks/useMySurveyInstances';
 
@@ -30,9 +32,10 @@ export default function HostRoutes(props: { user: User }) {
 
   const [mySurveys, saveSurvey, deleteSurvey] = useMySurveys(user.id);
 
-  const [mySurveyInstances, updateSurveyInstance, deleteSurveyInstance] = useMySurveyInstances(
-    user.id,
-  );
+  const [
+    mySurveyInstances,
+    { addSurveyInstance, updateSurveyInstance, deleteSurveyInstance },
+  ] = useMySurveyInstances(user.id);
 
   if (mySurveys.loading || mySurveyInstances.loading) {
     return <Loading />;
@@ -84,10 +87,10 @@ export default function HostRoutes(props: { user: User }) {
         )}
       />
       <Route
-        path={getPresentSurveyPath()}
+        path={getSurveyPresenterPath()}
         exact
         render={props => (
-          <Present
+          <Presenter
             {...props}
             surveys={mySurveys.value!}
             surveyInstances={mySurveyInstances.value!}
@@ -97,13 +100,19 @@ export default function HostRoutes(props: { user: User }) {
         )}
       />
       <Route
+        path={getSurveyPresenterInfoPath()}
+        exact
+        render={props => <PresenterInfo {...props} surveyInstances={mySurveyInstances.value!} />}
+      />
+      <Route
         path={getSurveyPath()}
+        exact
         render={props => (
           <Survey
             {...props}
-            user={user}
             surveys={mySurveys.value!}
             surveyInstances={mySurveyInstances.value!}
+            addSurveyInstance={addSurveyInstance}
             deleteSurveyInstance={deleteSurveyInstance}
           />
         )}

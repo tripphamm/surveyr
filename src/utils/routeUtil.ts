@@ -21,7 +21,9 @@ export const getSurveysPath = () => [ROOT, AUTH, HOST, SURVEYS].join('/');
 export const getCreateSurveyPath = () => [ROOT, AUTH, HOST, SURVEYS, 'add'].join('/');
 export const getEditSurveyPath = (surveyId: string = ':surveyId') =>
   [ROOT, AUTH, HOST, SURVEYS, surveyId, 'edit'].join('/');
-export const getPresentSurveyPath = (shareCode: string = ':shareCode') =>
-  [ROOT, AUTH, HOST, SURVEYS, shareCode, 'present'].join('/');
+export const getSurveyPresenterPath = (shareCode: string = ':shareCode') =>
+  [ROOT, AUTH, HOST, SURVEYS, shareCode, 'presenter'].join('/');
+export const getSurveyPresenterInfoPath = (shareCode: string = ':shareCode') =>
+  [ROOT, AUTH, HOST, SURVEYS, shareCode, 'presenterInfo'].join('/');
 export const getSurveyPath = (surveyId: string = ':surveyId') =>
   [ROOT, AUTH, HOST, SURVEYS, surveyId].join('/');

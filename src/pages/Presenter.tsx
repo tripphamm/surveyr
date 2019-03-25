@@ -20,8 +20,9 @@ import useSurveyResponses from '../hooks/useSurveyResponses';
 import { denormalizeSurvey } from '../utils/normalizationUtil';
 import Loading from './Loading';
 import NotFound from './NotFound';
+import { getSurveyPath } from '../utils/routeUtil';
 
-function Present(
+function Presenter(
   props: RouteComponentProps & {
     theme: Theme;
     surveys: NormalizedSurveys;
@@ -107,7 +108,7 @@ function Present(
           color="inherit"
           onClick={async () => {
             await deleteSurveyInstance(surveyInstance.id);
-            history.goBack();
+            history.push(getSurveyPath(survey.id));
           }}
         >
           <Icon>
@@ -204,4 +205,4 @@ function Present(
   );
 }
 
-export default withTheme()(Present);
+export default withTheme()(Presenter);
