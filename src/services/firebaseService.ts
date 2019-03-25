@@ -24,16 +24,3 @@ if (firebase.auth === undefined) {
 }
 
 export const auth = firebase.auth();
-
-export function getUIConfig() {
-  const signInOptions = [
-    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-    firebase.auth.EmailAuthProvider.PROVIDER_ID,
-  ];
-
-  return {
-    signInOptions,
-    tosUrl: '/tos',
-    privacyPolicyUrl: '/privacy',
-  };
-}

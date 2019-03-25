@@ -20,34 +20,45 @@ export default function useMySurveys(
       loading: true,
     });
 
-    // subscribe function returns unsubscribe
-    const unsubscribe = firestore
-      .collection('surveys')
-      .where('authorId', '==', userId)
-      .onSnapshot(surveysSnapshot => {
-        try {
-          const mySurveys = surveysSnapshot.docs.reduce<NormalizedSurveys>((surveys, surveyDoc) => {
-            const survey = surveyDoc.data() as Survey;
-            survey.id = surveyDoc.id;
-            surveys[surveyDoc.id] = normalizeSurvey(survey);
-            return surveys;
-          }, {});
+    try {
+      // subscribe function returns unsubscribe
+      const unsubscribe = firestore
+        .collection('surveys')
+        .where('authorId', '==', userId)
+        .onSnapshot(surveysSnapshot => {
+          try {
+            const mySurveys = surveysSnapshot.docs.reduce<NormalizedSurveys>(
+              (surveys, surveyDoc) => {
+                const survey = surveyDoc.data() as Survey;
+                survey.id = surveyDoc.id;
+                surveys[surveyDoc.id] = normalizeSurvey(survey);
+                return surveys;
+              },
+              {},
+            );
 
-          setMySurveys({
-            loading: false,
-            errorCode: undefined,
-            value: mySurveys,
-          });
-        } catch (error) {
-          setMySurveys({
-            loading: false,
-            errorCode: error.toString(),
-            value: undefined,
-          });
-        }
+            setMySurveys({
+              loading: false,
+              errorCode: undefined,
+              value: mySurveys,
+            });
+          } catch (error) {
+            setMySurveys({
+              loading: false,
+              errorCode: error.toString(),
+              value: undefined,
+            });
+          }
+        });
+
+      return unsubscribe;
+    } catch (error) {
+      setMySurveys({
+        loading: false,
+        errorCode: error.toString(),
+        value: undefined,
       });
-
-    return unsubscribe;
+    }
   }, [userId]);
 
   const saveSurvey = useCallback(

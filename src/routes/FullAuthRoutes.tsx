@@ -7,9 +7,6 @@ import { State } from '../state/state';
 import HostRoutes from './HostRoutes';
 import NotFound from '../pages/NotFound';
 import ErrorMessage from '../pages/ErrorMessage';
-import Loading from '../pages/Loading';
-
-const Auth = React.lazy(() => import('../pages/Auth'));
 
 const mapState = (s: State) => {
   return {
@@ -27,11 +24,7 @@ export default function FullAuthRoutes(props: RouteComponentProps) {
   }
 
   if (user === null || user.isAnonymous) {
-    return (
-      <Suspense fallback={<Loading />}>
-        <Auth />
-      </Suspense>
-    );
+    return <Redirect to="/auth" />;
   }
 
   return (

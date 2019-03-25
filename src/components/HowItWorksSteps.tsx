@@ -45,7 +45,7 @@ export default function HowItWorksSteps() {
         </ListItemAvatar>
         <ListItemText
           primary="Put the live-results up on a big screen somewhere"
-          secondary="And control the presentation from your phone"
+          secondary="And use your phone to control the presentation!"
         />
       </ListItem>
     </List>

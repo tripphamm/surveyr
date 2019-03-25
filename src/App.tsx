@@ -8,46 +8,7 @@ import { createSetUserSuccessAction, createSetUserFailureAction } from './state/
 import Loading from './pages/Loading';
 import { State } from './state/state';
 
-const mapState = (state: State) => {
-  return {
-    user: state.user.value,
-  };
-};
-
 export default function App() {
-  const dispatch = useDispatch();
-  const { user } = useMappedState(mapState);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      try {
-        if (user === null) {
-          // user signed out
-          dispatch(createSetUserSuccessAction(null));
-        } else {
-          // user signed in
-          dispatch(
-            createSetUserSuccessAction({
-              id: user.uid,
-              isAnonymous: user.isAnonymous,
-              displayName: user.displayName,
-            }),
-          );
-        }
-      } catch (error) {
-        dispatch(createSetUserFailureAction(error.toString()));
-      }
-    });
-
-    return unsubscribe;
-  }, [dispatch]);
-
-  // if user is undefined, it means that we haven't determined whether or not the user is alraedy signed in
-  // show the loader rather than flashing the sign-in screen
-  if (user === undefined) {
-    return <Loading />;
-  }
-
   return (
     <BrowserRouter>
       <Routes />

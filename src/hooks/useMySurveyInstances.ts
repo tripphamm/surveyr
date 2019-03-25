@@ -26,30 +26,38 @@ export default function useMySurveyInstances(
   });
 
   useEffect(() => {
-    firestore
-      .collection('survey-instances')
-      .where('authorId', '==', userId)
-      .onSnapshot(mySurveyInstancesSnapshot => {
-        const surveyInstances = mySurveyInstancesSnapshot.docs.map(doc => {
-          const surveyInstance = doc.data() as SurveyInstance;
-          surveyInstance.id = doc.id;
-          return surveyInstance;
-        });
+    try {
+      firestore
+        .collection('survey-instances')
+        .where('authorId', '==', userId)
+        .onSnapshot(mySurveyInstancesSnapshot => {
+          const surveyInstances = mySurveyInstancesSnapshot.docs.map(doc => {
+            const surveyInstance = doc.data() as SurveyInstance;
+            surveyInstance.id = doc.id;
+            return surveyInstance;
+          });
 
-        const normalizedSurveyInstances = surveyInstances.reduce<NormalizedSurveyInstances>(
-          (acc, surveyInstance) => {
-            acc[surveyInstance.shareCode] = surveyInstance;
-            return acc;
-          },
-          {},
-        );
+          const normalizedSurveyInstances = surveyInstances.reduce<NormalizedSurveyInstances>(
+            (acc, surveyInstance) => {
+              acc[surveyInstance.shareCode] = surveyInstance;
+              return acc;
+            },
+            {},
+          );
 
-        setMySurveyInstances({
-          loading: false,
-          errorCode: undefined,
-          value: normalizedSurveyInstances,
+          setMySurveyInstances({
+            loading: false,
+            errorCode: undefined,
+            value: normalizedSurveyInstances,
+          });
         });
+    } catch (error) {
+      setMySurveyInstances({
+        loading: false,
+        errorCode: error.toString(),
+        value: undefined,
       });
+    }
   }, [userId]);
 
   const addSurveyInstance = useCallback(

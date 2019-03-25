@@ -1,11 +1,14 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
+import firebase from 'firebase/app';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import { useMappedState } from 'redux-react-hook';
 import { Link } from 'react-router-dom';
 import firebaseui from 'firebaseui';
+import { Theme } from '@material-ui/core/styles/createMuiTheme';
+import withTheme from '@material-ui/core/styles/withTheme';
 
-import { auth, getUIConfig } from '../services/firebaseService';
+import { auth } from '../services/firebaseService';
 import Shell from '../components/Shell';
 import { State } from '../state/state';
 import EmojiIcon from '../components/EmojiIcon';
@@ -18,7 +21,11 @@ const mapState = (state: State) => {
   };
 };
 
-export default function Auth() {
+const ui = new firebaseui.auth.AuthUI(auth);
+
+function Auth(props: { theme: Theme }) {
+  const { theme } = props;
+
   const { user } = useMappedState(mapState);
   const { history } = useRouter();
 
@@ -28,11 +35,16 @@ export default function Auth() {
     auth.signOut();
   }
 
-  const ui = useMemo(() => new firebaseui.auth.AuthUI(auth), []);
-
   useEffect(() => {
-    ui.start('#firebaseui-auth-container', getUIConfig());
-  }, [ui]);
+    ui.start('#firebaseui-auth-container', {
+      signInOptions: [
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      ],
+      tosUrl: '/tos',
+      privacyPolicyUrl: '/privacy',
+    });
+  }, [history]);
 
   if (ui.isPendingRedirect()) {
     // if this is just the flash of UI before the auth redirect, we want to show the loading screen
@@ -81,8 +93,8 @@ export default function Auth() {
 
         <Typography style={{ textAlign: 'center' }} color="textSecondary">
           Hold up. I just want to{' '}
-          <Link to={getJoinSurveyPath()}>
-            <Typography color="primary">join a survey</Typography>
+          <Link style={{ color: theme.palette.primary.main }} to={getJoinSurveyPath()}>
+            join a survey
           </Link>
         </Typography>
 
@@ -91,3 +103,5 @@ export default function Auth() {
     </Shell>
   );
 }
+
+export default withTheme()(Auth);

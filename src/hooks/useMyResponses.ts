@@ -24,39 +24,47 @@ export default function useMyResponses(
       loading: true,
     });
 
-    // subscribe function returns unsubscribe
-    const unsubscribe = firestore
-      .collection('survey-responses')
-      .doc(surveyInstanceId)
-      .collection('answers')
-      .where('userId', '==', userId)
-      .onSnapshot(mySurveyResponsesSnapshot => {
-        try {
-          const normalizedResponses = mySurveyResponsesSnapshot.docs.reduce<
-            MySurveyResponsesByQuestionId
-          >((mySurveyResponses, surveyResponseDoc) => {
-            const surveyResponse = surveyResponseDoc.data() as SurveyResponse;
-            surveyResponse.id = surveyResponseDoc.id;
-            mySurveyResponses[surveyResponse.questionId] = surveyResponse;
+    try {
+      // subscribe function returns unsubscribe
+      const unsubscribe = firestore
+        .collection('survey-responses')
+        .doc(surveyInstanceId)
+        .collection('answers')
+        .where('userId', '==', userId)
+        .onSnapshot(mySurveyResponsesSnapshot => {
+          try {
+            const normalizedResponses = mySurveyResponsesSnapshot.docs.reduce<
+              MySurveyResponsesByQuestionId
+            >((mySurveyResponses, surveyResponseDoc) => {
+              const surveyResponse = surveyResponseDoc.data() as SurveyResponse;
+              surveyResponse.id = surveyResponseDoc.id;
+              mySurveyResponses[surveyResponse.questionId] = surveyResponse;
 
-            return mySurveyResponses;
-          }, {});
+              return mySurveyResponses;
+            }, {});
 
-          setmyResponses({
-            loading: false,
-            errorCode: undefined,
-            value: normalizedResponses,
-          });
-        } catch (error) {
-          setmyResponses({
-            loading: false,
-            errorCode: error.toString(),
-            value: undefined,
-          });
-        }
+            setmyResponses({
+              loading: false,
+              errorCode: undefined,
+              value: normalizedResponses,
+            });
+          } catch (error) {
+            setmyResponses({
+              loading: false,
+              errorCode: error.toString(),
+              value: undefined,
+            });
+          }
+        });
+
+      return unsubscribe;
+    } catch (error) {
+      setmyResponses({
+        loading: false,
+        errorCode: error.toString(),
+        value: undefined,
       });
-
-    return unsubscribe;
+    }
   }, [userId, surveyInstanceId]);
 
   const submitAnswer = useCallback(
