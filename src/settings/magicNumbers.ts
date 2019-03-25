@@ -7,3 +7,5 @@ export const floatingActionButtonOffsetBottom = 30 + bottomBarHeight;
 export const floatingActionButtonBufferSize = floatingActionButtonSize + 10;
 
 export const radioButtonIconSize = 24;
+
+export const avatarSize = 40;

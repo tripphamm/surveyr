@@ -28,6 +28,8 @@ const EmojiIcon: React.FunctionComponent<EmojiIconProps> = (props: EmojiIconProp
       style={{
         height: size,
         width: size,
+        minHeight: size,
+        minWidth: size,
       }}
       src={getImageSrcByShortName(emojiShortName, { size: emojiImageSize })}
       alt={emojiShortName}

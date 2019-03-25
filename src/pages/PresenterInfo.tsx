@@ -17,10 +17,11 @@ import { getSurveyPresenterPath } from '../utils/routeUtil';
 import surveyCodeIcon from '../images/survey-code-icon.png';
 import { getImageSrcByShortName } from '../utils/emojiUtil';
 import Snackbar from '@material-ui/core/Snackbar';
-import { bottomBarHeight } from '../settings/magicNumbers';
+import { bottomBarHeight, avatarSize } from '../settings/magicNumbers';
 import IconButton from '@material-ui/core/IconButton';
 import { RouteComponentProps } from 'react-router';
 import { NormalizedSurveyInstances } from '../state/state';
+import EmojiIcon from '../components/EmojiIcon';
 
 export default function PresenterInfo(
   props: RouteComponentProps & {
@@ -80,7 +81,7 @@ export default function PresenterInfo(
           >
             <ListItem style={{ cursor: 'pointer' }}>
               <ListItemAvatar>
-                <Avatar src={getImageSrcByShortName(':bar_chart:')} alt="Srvy logo" />
+                <EmojiIcon emojiShortName={':tv:'} size={avatarSize} />
               </ListItemAvatar>
               <ListItemText
                 primary={`https://srvy.live/results/${shareCode}`}
@@ -95,7 +96,7 @@ export default function PresenterInfo(
           >
             <ListItem style={{ cursor: 'pointer' }}>
               <ListItemAvatar>
-                <Avatar src={getImageSrcByShortName(':bar_chart:')} alt="Srvy logo" />
+                <EmojiIcon emojiShortName={':incoming_envelope:'} size={avatarSize} />
               </ListItemAvatar>
               <ListItemText
                 primary={`https://srvy.live/join/${shareCode}`}

@@ -9,6 +9,8 @@ import createSurveyIcon from '../images/create-survey-icon.png';
 import startSurveyIcon from '../images/start-survey-icon.png';
 import surveyCodeIcon from '../images/survey-code-icon.png';
 import { getImageSrcByShortName } from '../utils/emojiUtil';
+import EmojiIcon from './EmojiIcon';
+import { avatarSize } from '../settings/magicNumbers';
 
 export default function HowItWorksSteps() {
   return (
@@ -39,11 +41,11 @@ export default function HowItWorksSteps() {
 
       <ListItem>
         <ListItemAvatar>
-          <Avatar src={getImageSrcByShortName(':bar_chart:')} alt="Srvy logo" />
+          <EmojiIcon emojiShortName={':tv:'} size={avatarSize} />
         </ListItemAvatar>
         <ListItemText
           primary="Put the live-results up on a big screen somewhere"
-          secondary="Just open a browser and go to srvy.live/results/<your-secret-code-here>"
+          secondary="And control the presentation from your phone"
         />
       </ListItem>
     </List>
