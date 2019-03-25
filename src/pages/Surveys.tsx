@@ -1,10 +1,13 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
+import Badge from '@material-ui/core/Badge';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { RouteComponentProps, Link } from 'react-router-dom';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 
 import useRouter from '../hooks/useRouter';
 
@@ -13,14 +16,18 @@ import EmojiIcon from '../components/EmojiIcon';
 import FloatingAddButton from '../components/FloatingAddButton';
 
 import { auth } from '../services/firebaseService';
-import { NormalizedSurveys } from '../state/state';
+import { NormalizedSurveys, NormalizedSurveyInstances } from '../state/state';
 import { getSurveyPath, getCreateSurveyPath, getHowItWorksPath } from '../utils/routeUtil';
 import HowItWorksSteps from '../components/HowItWorksSteps';
-import Typography from '@material-ui/core/Typography';
 import { floatingActionButtonBufferSize } from '../settings/magicNumbers';
 
-export default function Surveys(props: RouteComponentProps & { surveys: NormalizedSurveys }) {
-  const { surveys } = props;
+export default function Surveys(
+  props: RouteComponentProps & {
+    surveys: NormalizedSurveys;
+    surveyInstances: NormalizedSurveyInstances;
+  },
+) {
+  const { surveys, surveyInstances } = props;
 
   const { history } = useRouter();
 
@@ -84,6 +91,18 @@ export default function Surveys(props: RouteComponentProps & { surveys: Normaliz
                     >
                       {survey.title}
                     </ListItemText>
+                    <ListItemSecondaryAction>
+                      <Badge
+                        badgeContent={
+                          Object.values(surveyInstances).filter(
+                            surveyInstance => surveyInstance.surveyId === survey.id,
+                          ).length
+                        }
+                        color="primary"
+                      >
+                        <div />
+                      </Badge>
+                    </ListItemSecondaryAction>
                   </ListItem>
                 </Link>
               ))}

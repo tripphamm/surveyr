@@ -22,6 +22,10 @@ export interface SurveyInstance {
   showResults: boolean;
 }
 
+export interface NormalizedSurveyInstances {
+  [shareCode: string]: SurveyInstance;
+}
+
 export interface User {
   id: string;
   isAnonymous: boolean;

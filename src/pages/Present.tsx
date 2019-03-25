@@ -13,87 +13,73 @@ import { RouteComponentProps } from 'react-router-dom';
 import Shell from '../components/Shell';
 import useRouter from '../hooks/useRouter';
 import EmojiIcon from '../components/EmojiIcon';
-import { State, NormalizedSurveys } from '../state/state';
+import { NormalizedSurveys, NormalizedSurveyInstances, SurveyInstance } from '../state/state';
 import AnimatedBar from '../components/AnimatedBar';
-import { useMappedState } from 'redux-react-hook';
-import useHostedSurveyInstance from '../hooks/useHostedSurveyInstance';
 import ErrorMessage from './ErrorMessage';
 import useSurveyResponses from '../hooks/useSurveyResponses';
 import { denormalizeSurvey } from '../utils/normalizationUtil';
 import Loading from './Loading';
+import NotFound from './NotFound';
 
-const mapState = (state: State) => {
-  return {
-    user: state.user.value,
-  };
-};
+function Present(
+  props: RouteComponentProps & {
+    theme: Theme;
+    surveys: NormalizedSurveys;
+    surveyInstances: NormalizedSurveyInstances;
+    updateSurveyInstance: (
+      surveyInstanceId: string,
+      surveyInstanceUpdate: Partial<SurveyInstance>,
+    ) => Promise<void>;
+    deleteSurveyInstance: (surveyInstanceId: string) => Promise<void>;
+  },
+) {
+  const { theme, surveys, surveyInstances, updateSurveyInstance, deleteSurveyInstance } = props;
 
-function Present(props: RouteComponentProps & { theme: Theme; surveys: NormalizedSurveys }) {
-  const { theme, surveys } = props;
+  const { history, match } = useRouter<{ shareCode: string }>();
+  const { params } = match;
+  const { shareCode } = params;
 
-  const { user } = useMappedState(mapState);
+  const surveyInstance = surveyInstances[shareCode];
 
-  if (!user) {
-    throw {
-      type: 'ERROR',
-      logMessage: 'No User in <Present />',
-    };
+  const surveyResponses = useSurveyResponses(surveyInstance ? surveyInstance.id : undefined);
+
+  if (surveyInstance === undefined) {
+    return <NotFound />;
   }
 
-  const { history, match } = useRouter<{ surveyId: string }>();
-  const { params } = match;
-  const { surveyId } = params;
+  if (surveyResponses.loading) {
+    return <Loading />;
+  }
 
-  const normalizedSurvey = surveys[surveyId];
+  if (surveyResponses.errorCode !== undefined) {
+    return <ErrorMessage />;
+  }
+
+  // surveyResponses is not loading and it doesn't have errors, so the data must be available
+  if (surveyResponses.value === undefined) {
+    // todo: log
+    return <ErrorMessage />;
+  }
+
+  const normalizedSurvey = surveys[surveyInstance.surveyId];
 
   if (!normalizedSurvey) {
-    throw {
-      type: 'NOT_FOUND',
-      userMessage: "Hm. We can't find that survey",
-    };
+    return <NotFound />;
   }
 
   const survey = denormalizeSurvey(normalizedSurvey);
 
   if (survey.questions.length === 0) {
-    throw {
-      type: 'ERROR',
-      logMessage: 'Hosted survey has 0 questions',
-    };
-  }
-
-  const currentQuestionId = survey.questions[0].id;
-
-  const [hostedSurvey, updateHostedSurvey, deleteHostedSurvey] = useHostedSurveyInstance(
-    user.id,
-    surveyId,
-    currentQuestionId,
-  );
-
-  const [surveyResponses, deleteSurveyResponses] = useSurveyResponses(
-    hostedSurvey.value ? hostedSurvey.value.id : undefined,
-  );
-
-  if (hostedSurvey.loading || surveyResponses.loading) {
-    return <Loading />;
-  }
-
-  if (hostedSurvey.errorCode !== undefined || surveyResponses.errorCode !== undefined) {
+    // todo log
     return <ErrorMessage />;
   }
 
-  // hostedSurvey and surveyResponses are not loading and they don't have errors, so the data must be available
-  if (hostedSurvey.value === undefined || surveyResponses.value === undefined) {
-    // todo: log
-    return <ErrorMessage />;
-  }
-
-  const currentQuestion = normalizedSurvey.questions[hostedSurvey.value.currentQuestionId];
+  const currentQuestion = normalizedSurvey.questions[surveyInstance.currentQuestionId];
 
   // count the responses for each answer
   let responses: { [answerId: string]: number } = {};
-  if (surveyResponses.value[hostedSurvey.value.currentQuestionId] !== undefined) {
-    responses = surveyResponses.value[hostedSurvey.value.currentQuestionId].reduce<{
+  if (surveyResponses.value[surveyInstance.currentQuestionId] !== undefined) {
+    responses = surveyResponses.value[surveyInstance.currentQuestionId].reduce<{
       [answerId: string]: number;
     }>((r, surveyAnswer) => {
       if (r[surveyAnswer.answerId] === undefined) {
@@ -110,7 +96,7 @@ function Present(props: RouteComponentProps & { theme: Theme; surveys: Normalize
 
   return (
     <Shell
-      title={`Srvy | ${hostedSurvey.value.shareCode}`}
+      title={`Srvy | ${surveyInstance.shareCode}`}
       buttonLeftComponent={
         <IconButton onClick={() => history.push('/')}>
           <EmojiIcon emojiShortName=":bar_chart:" size={32} />
@@ -120,10 +106,8 @@ function Present(props: RouteComponentProps & { theme: Theme; surveys: Normalize
         <IconButton
           color="inherit"
           onClick={async () => {
+            await deleteSurveyInstance(surveyInstance.id);
             history.goBack();
-
-            await deleteSurveyResponses();
-            await deleteHostedSurvey();
           }}
         >
           <Icon>
@@ -137,9 +121,10 @@ function Present(props: RouteComponentProps & { theme: Theme; surveys: Normalize
             style={{ height: 'inherit', width: '50%' }}
             variant="contained"
             color="primary"
+            disabled={currentQuestion.number === 0}
             onClick={() => {
               if (currentQuestion.number > 0) {
-                updateHostedSurvey({
+                updateSurveyInstance(surveyInstance.id, {
                   currentQuestionId: survey.questions[currentQuestion.number - 1].id,
                 });
               }
@@ -151,9 +136,10 @@ function Present(props: RouteComponentProps & { theme: Theme; surveys: Normalize
             style={{ height: 'inherit', width: '50%' }}
             variant="contained"
             color="primary"
+            disabled={currentQuestion.number === survey.questions.length - 1}
             onClick={() => {
               if (currentQuestion.number < survey.questions.length - 1) {
-                updateHostedSurvey({
+                updateSurveyInstance(surveyInstance.id, {
                   currentQuestionId: survey.questions[currentQuestion.number + 1].id,
                 });
               }
@@ -182,7 +168,7 @@ function Present(props: RouteComponentProps & { theme: Theme; surveys: Normalize
           variant="h5"
           color="textSecondary"
         >
-          {hostedSurvey.value.shareCode}
+          {shareCode}
         </Typography>
 
         <Typography
@@ -200,7 +186,7 @@ function Present(props: RouteComponentProps & { theme: Theme; surveys: Normalize
             <div key={`presentation-answer-${possibleAnswer.id}`} style={{ width: '100%' }}>
               <Typography variant="h5">{possibleAnswer.value}</Typography>
               {/* TypeScript pls. Why do I suddenly need ! */}
-              {hostedSurvey.value!.showResults && (
+              {surveyInstance.showResults && (
                 <AnimatedBar
                   value={
                     responsesCount > 0 && responses[possibleAnswer.id] !== undefined

@@ -21,6 +21,7 @@ import {
   getPresentSurveyPath,
   getSurveyPath,
 } from '../utils/routeUtil';
+import useMySurveyInstances from '../hooks/useMySurveyInstances';
 
 export default function HostRoutes(props: { user: User }) {
   const { user } = props;
@@ -29,17 +30,21 @@ export default function HostRoutes(props: { user: User }) {
 
   const [mySurveys, saveSurvey, deleteSurvey] = useMySurveys(user.id);
 
-  if (mySurveys.loading) {
+  const [mySurveyInstances, updateSurveyInstance, deleteSurveyInstance] = useMySurveyInstances(
+    user.id,
+  );
+
+  if (mySurveys.loading || mySurveyInstances.loading) {
     return <Loading />;
   }
 
-  if (mySurveys.errorCode !== undefined) {
+  if (mySurveys.errorCode !== undefined || mySurveyInstances.errorCode) {
     return <ErrorMessage />;
   }
 
-  // mySurveys is not loading and has no error, so the value should exit
-  if (mySurveys.value === undefined) {
-    // todo: log erro
+  // mySurveys/Instances are not loading and have no errors, so the values should be set
+  if (mySurveys.value === undefined || mySurveyInstances.value === undefined) {
+    // todo: log error
     return <ErrorMessage />;
   }
 
@@ -53,7 +58,13 @@ export default function HostRoutes(props: { user: User }) {
       <Route
         path={getSurveysPath()}
         exact
-        render={props => <Surveys {...props} surveys={mySurveys.value!} />}
+        render={props => (
+          <Surveys
+            {...props}
+            surveys={mySurveys.value!}
+            surveyInstances={mySurveyInstances.value!}
+          />
+        )}
       />
       <Route
         path={getCreateSurveyPath()}
@@ -75,11 +86,27 @@ export default function HostRoutes(props: { user: User }) {
       <Route
         path={getPresentSurveyPath()}
         exact
-        render={props => <Present {...props} surveys={mySurveys.value!} />}
+        render={props => (
+          <Present
+            {...props}
+            surveys={mySurveys.value!}
+            surveyInstances={mySurveyInstances.value!}
+            updateSurveyInstance={updateSurveyInstance}
+            deleteSurveyInstance={deleteSurveyInstance}
+          />
+        )}
       />
       <Route
         path={getSurveyPath()}
-        render={props => <Survey {...props} surveys={mySurveys.value!} />}
+        render={props => (
+          <Survey
+            {...props}
+            user={user}
+            surveys={mySurveys.value!}
+            surveyInstances={mySurveyInstances.value!}
+            deleteSurveyInstance={deleteSurveyInstance}
+          />
+        )}
       />
 
       <Route path="*" component={NotFound} />

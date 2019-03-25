@@ -39,7 +39,6 @@ export default function FullAuthRoutes(props: RouteComponentProps) {
       <Route
         exact
         path={`${match.path}`}
-        // redirect /host to /host
         render={props => <Redirect {...props} to={`${match.path}/host`} />}
       />
       <Route path={`${match.path}/host`} render={props => <HostRoutes {...props} user={user} />} />

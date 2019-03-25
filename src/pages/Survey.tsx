@@ -9,25 +9,47 @@ import CardHeader from '@material-ui/core/CardHeader';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import { Clear } from '@material-ui/icons';
-import { RouteComponentProps } from 'react-router-dom';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import Clear from '@material-ui/icons/Clear';
+import Delete from '@material-ui/icons/Delete';
+import { RouteComponentProps, Link } from 'react-router-dom';
+import uuidv4 from 'uuid/v4';
 
 import Shell from '../components/Shell';
 import useRouter from '../hooks/useRouter';
 import EmojiIcon from '../components/EmojiIcon';
 import FloatingEditButton from '../components/FloatingEditButton';
-import { NormalizedSurveys } from '../state/state';
+import { NormalizedSurveys, User, NormalizedSurveyInstances } from '../state/state';
 import NotFound from './NotFound';
 import { getPresentSurveyPath, getEditSurveyPath, getSurveysPath } from '../utils/routeUtil';
+import { firestore } from '../services/firebaseService';
+import ErrorMessage from './ErrorMessage';
 
-export default function Survey(props: RouteComponentProps & { surveys: NormalizedSurveys }) {
-  const { surveys } = props;
+export default function Survey(
+  props: RouteComponentProps & {
+    surveys: NormalizedSurveys;
+    surveyInstances: NormalizedSurveyInstances;
+    deleteSurveyInstance: (surveyInstanceId: string) => Promise<void>;
+    user: User;
+  },
+) {
+  const { surveys, surveyInstances, deleteSurveyInstance, user } = props;
 
   const { history, match } = useRouter<{ surveyId: string }>();
   const { params } = match;
   const { surveyId } = params;
 
   const survey = surveys[surveyId];
+  const surveyInstancesForThisSurvey = Object.values(surveyInstances).filter(
+    surveyInstance => surveyInstance.surveyId === survey.id,
+  );
+
+  const defaultQuestion = Object.values(survey.questions).find(question => question.number === 0);
+
+  if (defaultQuestion === undefined) {
+    // todo log
+    return <ErrorMessage />;
+  }
 
   if (survey === undefined) {
     return <NotFound />;
@@ -52,7 +74,18 @@ export default function Survey(props: RouteComponentProps & { surveys: Normalize
           style={{ height: '100%', width: '100%' }}
           variant="contained"
           color="primary"
-          onClick={() => history.push(getPresentSurveyPath(surveyId))}
+          onClick={async () => {
+            await firestore.collection('survey-instances').add({
+              authorId: user.id,
+              surveyId: surveyId,
+              currentQuestionId: defaultQuestion.id,
+              acceptAnswers: true,
+              showResults: true,
+              shareCode: uuidv4()
+                .slice(0, 4)
+                .toUpperCase(),
+            });
+          }}
         >
           Start
         </Button>
@@ -61,6 +94,32 @@ export default function Survey(props: RouteComponentProps & { surveys: Normalize
       <Typography variant="display1" gutterBottom>
         {survey.title}
       </Typography>
+      {surveyInstancesForThisSurvey.length > 0 && (
+        <Card style={{ marginBottom: 15 }}>
+          <CardHeader title="Active surveys" titleTypographyProps={{ color: 'primary' }} />
+          <CardContent>
+            <List>
+              {surveyInstancesForThisSurvey.map((surveyInstance, i) => (
+                <ListItem
+                  key={`survey-instance-${i}`}
+                  onClick={() => history.push(getPresentSurveyPath(surveyInstance.shareCode))}
+                >
+                  <ListItemText>{surveyInstance.shareCode}</ListItemText>
+                  <ListItemSecondaryAction>
+                    <IconButton
+                      aria-label="Delete"
+                      onClick={() => deleteSurveyInstance(surveyInstance.id)}
+                    >
+                      <Delete />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          </CardContent>
+        </Card>
+      )}
+
       {Object.values(survey.questions).map((question, qIndex) => (
         <Card key={`question-${qIndex}`} style={{ marginBottom: 15 }}>
           <CardHeader title={question.value} />
