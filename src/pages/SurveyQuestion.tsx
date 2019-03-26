@@ -21,6 +21,8 @@ import { State, SurveyInstance, NormalizedSurvey } from '../state/state';
 import Loading from './Loading';
 import ErrorMessage from './ErrorMessage';
 import UserGate from '../UserGate';
+import Button from '@material-ui/core/Button';
+import { getSurveyResultsPath, getSurveyQuestionPath } from '../utils/routeUtil';
 
 const mapState = (state: State) => {
   return {
@@ -41,7 +43,9 @@ export default function SurveyQuestion(props: {
   });
 
   const { user } = useMappedState(mapState);
-  const { history } = useRouter();
+  const { history, match } = useRouter<{ shareCode: string }>();
+  const { params } = match;
+  const { shareCode } = params;
 
   const currentQuestion = survey.questions[surveyInstance.currentQuestionId];
 
@@ -78,6 +82,31 @@ export default function SurveyQuestion(props: {
               <Clear />
             </Icon>
           </IconButton>
+        }
+        bottomBarComponent={
+          <div style={{ height: '100%' }}>
+            <Button
+              style={{ height: 'inherit', width: '50%' }}
+              variant="contained"
+              color="primary"
+              disabled
+              onClick={() => {
+                history.push(getSurveyQuestionPath(shareCode));
+              }}
+            >
+              My answer
+            </Button>
+            <Button
+              style={{ height: 'inherit', width: '50%' }}
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                history.push(getSurveyResultsPath(shareCode));
+              }}
+            >
+              Results
+            </Button>
+          </div>
         }
       >
         <div

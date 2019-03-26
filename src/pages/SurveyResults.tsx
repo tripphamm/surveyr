@@ -5,6 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
 import Clear from '@material-ui/icons/Clear';
+import Button from '@material-ui/core/Button';
 
 import Shell from '../components/Shell';
 import useRouter from '../hooks/useRouter';
@@ -15,6 +16,7 @@ import ErrorMessage from './ErrorMessage';
 import Loading from './Loading';
 import { SurveyInstance, NormalizedSurvey } from '../state/state';
 import UserGate from '../UserGate';
+import { getSurveyQuestionPath, getSurveyResultsPath } from '../utils/routeUtil';
 
 function SurveyResults(props: {
   theme: Theme;
@@ -23,7 +25,9 @@ function SurveyResults(props: {
 }) {
   const { surveyInstance, survey, theme } = props;
 
-  const { history } = useRouter();
+  const { history, match } = useRouter<{ shareCode: string }>();
+  const { params } = match;
+  const { shareCode } = params;
 
   const currentQuestion = survey.questions[surveyInstance.currentQuestionId];
 
@@ -75,6 +79,31 @@ function SurveyResults(props: {
               <Clear />
             </Icon>
           </IconButton>
+        }
+        bottomBarComponent={
+          <div style={{ height: '100%' }}>
+            <Button
+              style={{ height: 'inherit', width: '50%' }}
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                history.push(getSurveyQuestionPath(shareCode));
+              }}
+            >
+              My answer
+            </Button>
+            <Button
+              style={{ height: 'inherit', width: '50%' }}
+              variant="contained"
+              color="primary"
+              disabled
+              onClick={() => {
+                history.push(getSurveyResultsPath(shareCode));
+              }}
+            >
+              Results
+            </Button>
+          </div>
         }
       >
         <div
