@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useState } from 'react';
 import uuidv4 from 'uuid/v4';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
@@ -132,7 +132,7 @@ export default function SurveyEditor(props: {
   onDelete?: (surveyId: string) => Promise<void>;
 }) {
   const { initialSurveyData, onSave, onDelete } = props;
-
+  const [saving, setSaving] = useState(false);
   const [state, dispatchLocal] = useReducer<
     React.Reducer<
       { survey: UnsavedSurvey; autoFocusedId?: string },
@@ -165,14 +165,17 @@ export default function SurveyEditor(props: {
           style={{ height: '100%', width: '100%' }}
           variant="contained"
           color="primary"
-          onClick={() => {
+          onClick={async () => {
+            setSaving(true);
             onSave(unsavedSurvey);
+            setSaving(false);
           }}
           disabled={
             // has a title,
             // has at least one question,
             // all questions have text and at least one answer,
             // all answers have text
+            saving ||
             title.length === 0 ||
             questions.length === 0 ||
             questions.some(
