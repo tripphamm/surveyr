@@ -21,7 +21,6 @@ import FloatingEditButton from '../components/FloatingEditButton';
 import { NormalizedSurveys, User, NormalizedSurveyInstances } from '../state/state';
 import NotFound from './NotFound';
 import { getSurveyPresenterInfoPath, getEditSurveyPath, getSurveysPath } from '../utils/routeUtil';
-import ErrorMessage from './ErrorMessage';
 import UserGate from '../UserGate';
 
 export default function Survey(props: {
@@ -49,7 +48,7 @@ export default function Survey(props: {
 
   if (defaultQuestion === undefined) {
     // todo log
-    return <ErrorMessage />;
+    throw new Error('Unable to find question with `number` === 0');
   }
 
   if (survey === undefined) {

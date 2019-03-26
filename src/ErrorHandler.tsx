@@ -4,31 +4,37 @@ import NotFound from './pages/NotFound';
 
 interface ErrorHandlerState {
   errorType?: 'ERROR' | 'NOT_FOUND';
-  userMessage?: string;
 }
 
 // todo: maybe build this global error handler thing
 // it would log errors and display error messages in one place
 // we would just `throw` whenever we want
-export default class ErrorHandler extends React.Component<{}, ErrorHandlerState> {
+export default class ErrorHandler extends React.Component<
+  { children: React.ReactNode },
+  ErrorHandlerState
+> {
   state: ErrorHandlerState = {
     errorType: undefined,
-    userMessage: undefined,
   };
 
   componentDidCatch(error: any) {
-    if (error && error.isThowable) {
-      this.setState({ errorType: error.type, userMessage: error.userMessage });
+    if (error && error.code === 'NOT_FOUND') {
+      this.setState({ errorType: error.code });
+      return;
     }
+
+    this.setState({ errorType: 'ERROR' });
   }
 
   render() {
     if (this.state.errorType === 'ERROR') {
-      return <ErrorMessage message={this.state.userMessage} />;
+      return <ErrorMessage onNavigate={() => this.setState({ errorType: undefined })} />;
     }
 
     if (this.state.errorType === 'NOT_FOUND') {
-      return <NotFound message={this.state.userMessage} />;
+      return <NotFound onNavigate={() => this.setState({ errorType: undefined })} />;
     }
+
+    return <>{this.props.children}</>;
   }
 }

@@ -14,7 +14,6 @@ import useRouter from '../hooks/useRouter';
 import EmojiIcon from '../components/EmojiIcon';
 import { NormalizedSurveys, NormalizedSurveyInstances, SurveyInstance } from '../state/state';
 import AnimatedBar from '../components/AnimatedBar';
-import ErrorMessage from './ErrorMessage';
 import useSurveyResponses from '../hooks/useSurveyResponses';
 import { denormalizeSurvey } from '../utils/normalizationUtil';
 import Loading from './Loading';
@@ -51,13 +50,13 @@ function Presenter(props: {
   }
 
   if (surveyResponses.errorCode !== undefined) {
-    return <ErrorMessage />;
+    throw new Error(`SurveyResponses error: ${surveyResponses.errorCode}`);
   }
 
   // surveyResponses is not loading and it doesn't have errors, so the data must be available
   if (surveyResponses.value === undefined) {
     // todo: log
-    return <ErrorMessage />;
+    throw new Error(`SurveyResponses is not loading and has no error, but value is undefined`);
   }
 
   const normalizedSurvey = surveys[surveyInstance.surveyId];
@@ -70,7 +69,7 @@ function Presenter(props: {
 
   if (survey.questions.length === 0) {
     // todo log
-    return <ErrorMessage />;
+    throw new Error('Survey has no questions');
   }
 
   const currentQuestion = normalizedSurvey.questions[surveyInstance.currentQuestionId];

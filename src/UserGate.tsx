@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMappedState } from 'redux-react-hook';
 
 import { State, User } from './state/state';
@@ -76,11 +76,7 @@ export default function UserGate(props: { allowAnonymous?: boolean; children: Re
   }, [userAuthState, allowAnonymous]);
 
   if (userAuthState === UserAuthState.SIGNED_OUT && !allowAnonymous) {
-    return (
-      <Suspense fallback={<Loading />}>
-        <Auth />
-      </Suspense>
-    );
+    return <Auth />;
   }
 
   if (

@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import { useMappedState } from 'redux-react-hook';
 import { Route, Redirect, Switch } from 'react-router-dom';
 
@@ -24,7 +24,6 @@ const CreateSurvey = React.lazy(() => import('../pages/CreateSurvey'));
 const EditSurvey = React.lazy(() => import('../pages/EditSurvey'));
 const Presenter = React.lazy(() => import('../pages/Presenter'));
 const PresenterInfo = React.lazy(() => import('../pages/PresenterInfo'));
-const ErrorMessage = React.lazy(() => import('../pages/ErrorMessage'));
 const NotFound = React.lazy(() => import('../pages/NotFound'));
 
 const mapState = (state: State) => {
@@ -49,22 +48,23 @@ export default function HostRoutes() {
     return <Loading />;
   }
 
-  if (mySurveys.errorCode !== undefined || mySurveyInstances.errorCode) {
-    return (
-      <Suspense fallback={<Loading />}>
-        <ErrorMessage />
-      </Suspense>
-    );
+  if (mySurveys.errorCode !== undefined) {
+    throw new Error(`mySurveys error: ${mySurveys.errorCode}`);
+  }
+
+  if (mySurveyInstances.errorCode !== undefined) {
+    throw new Error(`mySurveyInstances error: ${mySurveyInstances.errorCode}`);
   }
 
   // mySurveys/Instances are not loading and have no errors, so the values should be set
-  if (mySurveys.value === undefined || mySurveyInstances.value === undefined) {
+  if (mySurveys.value === undefined) {
     // todo: log error
-    return (
-      <Suspense fallback={<Loading />}>
-        <ErrorMessage />
-      </Suspense>
-    );
+    throw new Error('mySurveys is not loading and has no error, but value is undefined');
+  }
+
+  if (mySurveyInstances.value === undefined) {
+    // todo: log error
+    throw new Error('mySurveyInstances is not loading and has no error, but value is undefined');
   }
 
   return (
@@ -77,73 +77,53 @@ export default function HostRoutes() {
       <Route
         path={getSurveysPath()}
         exact
-        render={props => (
-          <Suspense fallback={<Loading />}>
-            <Surveys
-              {...props}
-              surveys={mySurveys.value!}
-              surveyInstances={mySurveyInstances.value!}
-            />
-          </Suspense>
+        render={() => (
+          <Surveys surveys={mySurveys.value!} surveyInstances={mySurveyInstances.value!} />
         )}
       />
       <Route
         path={getCreateSurveyPath()}
         exact
-        render={() => (
-          <Suspense fallback={<Loading />}>
-            <CreateSurvey saveSurvey={saveSurvey} />
-          </Suspense>
-        )}
+        render={() => <CreateSurvey saveSurvey={saveSurvey} />}
       />
       <Route
         path={getEditSurveyPath(':surveyId')}
         exact
         render={() => (
-          <Suspense fallback={<Loading />}>
-            <EditSurvey
-              surveys={mySurveys.value!}
-              saveSurvey={saveSurvey}
-              deleteSurvey={deleteSurvey}
-            />
-          </Suspense>
+          <EditSurvey
+            surveys={mySurveys.value!}
+            saveSurvey={saveSurvey}
+            deleteSurvey={deleteSurvey}
+          />
         )}
       />
       <Route
         path={getSurveyPresenterPath(':shareCode')}
         exact
         render={() => (
-          <Suspense fallback={<Loading />}>
-            <Presenter
-              surveys={mySurveys.value!}
-              surveyInstances={mySurveyInstances.value!}
-              updateSurveyInstance={updateSurveyInstance}
-              deleteSurveyInstance={deleteSurveyInstance}
-            />
-          </Suspense>
+          <Presenter
+            surveys={mySurveys.value!}
+            surveyInstances={mySurveyInstances.value!}
+            updateSurveyInstance={updateSurveyInstance}
+            deleteSurveyInstance={deleteSurveyInstance}
+          />
         )}
       />
       <Route
         path={getSurveyPresenterInfoPath(':shareCode')}
         exact
-        render={() => (
-          <Suspense fallback={<Loading />}>
-            <PresenterInfo surveyInstances={mySurveyInstances.value!} />
-          </Suspense>
-        )}
+        render={() => <PresenterInfo surveyInstances={mySurveyInstances.value!} />}
       />
       <Route
         path={getSurveyPath(':surveyId')}
         exact
         render={() => (
-          <Suspense fallback={<Loading />}>
-            <Survey
-              surveys={mySurveys.value!}
-              surveyInstances={mySurveyInstances.value!}
-              addSurveyInstance={addSurveyInstance}
-              deleteSurveyInstance={deleteSurveyInstance}
-            />
-          </Suspense>
+          <Survey
+            surveys={mySurveys.value!}
+            surveyInstances={mySurveyInstances.value!}
+            addSurveyInstance={addSurveyInstance}
+            deleteSurveyInstance={deleteSurveyInstance}
+          />
         )}
       />
 

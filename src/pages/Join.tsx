@@ -32,7 +32,9 @@ export default function Join() {
             variant="contained"
             color="primary"
             disabled={shareCode.length === 0}
-            onClick={() => history.push(getSurveyQuestionPath(shareCode))}
+            onClick={() => {
+              history.push(getSurveyQuestionPath(shareCode));
+            }}
           >
             Join
           </Button>

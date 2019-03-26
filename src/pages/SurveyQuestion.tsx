@@ -19,7 +19,6 @@ import { radioButtonIconSize } from '../settings/magicNumbers';
 import useMyResponses from '../hooks/useMyResponses';
 import { State, SurveyInstance, NormalizedSurvey } from '../state/state';
 import Loading from './Loading';
-import ErrorMessage from './ErrorMessage';
 import UserGate from '../UserGate';
 import Button from '@material-ui/core/Button';
 import { getSurveyResultsPath, getSurveyQuestionPath } from '../utils/routeUtil';
@@ -61,7 +60,7 @@ export default function SurveyQuestion(props: {
   }
 
   if (myResponses.errorCode !== undefined) {
-    return <ErrorMessage />;
+    throw new Error(`myResponses error: ${myResponses.errorCode}`);
   }
 
   // myResponses is not loading and has no error, so the value should exist

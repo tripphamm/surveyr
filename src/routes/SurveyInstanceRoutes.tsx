@@ -6,7 +6,6 @@ import useSurveyInstance from '../hooks/useSurveyInstance';
 import useSurvey from '../hooks/useSurvey';
 
 import NotFound from '../pages/NotFound';
-import ErrorMessage from '../pages/ErrorMessage';
 import Loading from '../pages/Loading';
 import SurveyQuestion from '../pages/SurveyQuestion';
 import SurveyResults from '../pages/SurveyResults';
@@ -30,25 +29,30 @@ export default function SurveyInstanceRoutes() {
   }
 
   if (surveyInstance.errorCode === ErrorCode.MULTIPLE_SURVEY_INSTANCES_FOUND) {
-    return (
-      <ErrorMessage message="Uh oh. Looks like we goofed up bad. Somebody please tell the host to restart the survey." />
-    );
+    // todo: provide better error to user
+    throw new Error('Found multiple survey instances with the same code');
   }
 
   if (surveyInstance.loading || survey.loading) {
     return <Loading />;
   }
 
-  // some other error; render the default error component
-  if (surveyInstance.errorCode !== undefined || survey.errorCode !== undefined) {
-    return <ErrorMessage />;
+  if (surveyInstance.errorCode !== undefined) {
+    throw new Error(`surveyInstance error: ${surveyInstance.errorCode}`);
   }
 
-  // surveyInstance is not loading and has no error, so the data should exist at this point
+  if (survey.errorCode !== undefined) {
+    throw new Error(`survey error: ${survey.errorCode}`);
+  }
 
-  if (surveyInstance.value === undefined || survey.value === undefined) {
-    // todo: log this
-    return <ErrorMessage />;
+  if (surveyInstance.value === undefined) {
+    // todo: log error
+    throw new Error('surveyInstance is not loading and has no error, but value is undefined');
+  }
+
+  if (survey.value === undefined) {
+    // todo: log error
+    throw new Error('survey is not loading and has no error, but value is undefined');
   }
 
   return (

@@ -12,7 +12,6 @@ import useRouter from '../hooks/useRouter';
 import EmojiIcon from '../components/EmojiIcon';
 import AnimatedBar from '../components/AnimatedBar';
 import useSurveyResponses from '../hooks/useSurveyResponses';
-import ErrorMessage from './ErrorMessage';
 import Loading from './Loading';
 import { SurveyInstance, NormalizedSurvey } from '../state/state';
 import UserGate from '../UserGate';
@@ -38,13 +37,13 @@ function SurveyResults(props: {
   }
 
   if (surveyResponses.errorCode !== undefined) {
-    return <ErrorMessage />;
+    throw new Error(`surveyResponses error: ${surveyResponses.errorCode}`);
   }
 
   // surveyResponses is not loading and has no error, so it should exist
   if (surveyResponses.value === undefined) {
     // todo: log error
-    return <ErrorMessage />;
+    throw new Error('surveyResponses is not loading and has no error, but value is undefined');
   }
 
   let responses: { [answerId: string]: number } = {};

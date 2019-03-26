@@ -8,9 +8,11 @@ import Shell from '../components/Shell';
 export default function NotFound({
   message,
   actionComponent,
+  onNavigate,
 }: {
   message?: string;
   actionComponent?: React.ReactNode;
+  onNavigate?: () => void;
 }) {
   return (
     <Shell>
@@ -29,7 +31,7 @@ export default function NotFound({
         {actionComponent ? (
           actionComponent
         ) : (
-          <Link to="/">
+          <Link to="/" onClick={onNavigate}>
             <Typography>Head home</Typography>
           </Link>
         )}

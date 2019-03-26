@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
 
 import {
@@ -24,15 +24,7 @@ const NotFound = React.lazy(() => import('../pages/NotFound'));
 export default function Routes() {
   return (
     <Switch>
-      <Route
-        exact
-        path="/"
-        render={() => (
-          <Suspense fallback={<Loading />}>
-            <Home />
-          </Suspense>
-        )}
-      />
+      <Route exact path="/" render={() => <Home />} />
       <Route
         path={getHostPath()}
         render={() => (
@@ -41,23 +33,8 @@ export default function Routes() {
           </UserGate>
         )}
       />
-      <Route
-        path={getJoinSurveyPath()}
-        exact
-        render={() => (
-          <Suspense fallback={<Loading />}>
-            <Join />
-          </Suspense>
-        )}
-      />
-      <Route
-        path={getHowItWorksPath()}
-        render={() => (
-          <Suspense fallback={<Loading />}>
-            <HowItWorks />
-          </Suspense>
-        )}
-      />
+      <Route path={getJoinSurveyPath()} exact render={() => <Join />} />
+      <Route path={getHowItWorksPath()} render={() => <HowItWorks />} />
       <Route path={getSurveyInstanceRoutesPath()} component={SurveyInstanceRoutes} />
       <Route
         path="/results/:shareCode"
@@ -81,30 +58,9 @@ export default function Routes() {
           return <Redirect to={getSurveyQuestionPath(shareCode)} />;
         }}
       />
-      <Route
-        path="/tos"
-        render={() => (
-          <Suspense fallback={<Loading />}>
-            <TOS />
-          </Suspense>
-        )}
-      />
-      <Route
-        path="/privacy"
-        render={() => (
-          <Suspense fallback={<Loading />}>
-            <Privacy />
-          </Suspense>
-        )}
-      />
-      <Route
-        path="*"
-        render={() => (
-          <Suspense fallback={<Loading />}>
-            <NotFound />
-          </Suspense>
-        )}
-      />
+      <Route path="/tos" render={() => <TOS />} />
+      <Route path="/privacy" render={() => <Privacy />} />
+      <Route path="*" render={() => <NotFound />} />
     </Switch>
   );
 }
