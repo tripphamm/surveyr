@@ -8,10 +8,10 @@ import Loading from './pages/Loading';
 const Auth = React.lazy(() => import('./pages/Auth'));
 
 enum UserAuthState {
-  SIGNED_IN,
-  SIGNED_IN_ANONOMOUSLY,
-  SIGNED_OUT,
-  UNKNOWN,
+  SIGNED_IN = 'SIGNED_IN',
+  SIGNED_IN_ANONOMOUSLY = 'SIGNED_IN_ANONOMOUSLY',
+  SIGNED_OUT = 'SIGNED_OUT',
+  UNKNOWN = 'UNKNOWN',
 }
 
 const getUserAuthState = (user: User | null | undefined) => {
@@ -34,11 +34,17 @@ const mapState = (state: State) => {
 
 export default function UserGate(props: { allowAnonymous?: boolean; children: React.ReactNode }) {
   const [authenticatingAnonymously, setAuthenticatingAnonymously] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const { allowAnonymous = false, children } = props;
 
   const { user } = useMappedState(mapState);
 
   const userAuthState = getUserAuthState(user);
+
+  // if the user is signed out, toggle the signing-out flag off
+  if (signingOut && userAuthState === UserAuthState.SIGNED_OUT) {
+    setSigningOut(false);
+  }
 
   // if user is signed in, toggle the authenticating flag off
   if (
@@ -65,18 +71,9 @@ export default function UserGate(props: { allowAnonymous?: boolean; children: Re
   useEffect(() => {
     if (userAuthState === UserAuthState.SIGNED_IN_ANONOMOUSLY && !allowAnonymous) {
       auth.signOut();
+      setSigningOut(true);
     }
   }, [userAuthState, allowAnonymous]);
-
-  // if user is undefined, it means that we haven't determined whether or not the user is alraedy signed in
-  // show the loader rather than flashing the sign-in screen
-  if (userAuthState === UserAuthState.UNKNOWN) {
-    return <Loading />;
-  }
-
-  if (authenticatingAnonymously) {
-    return <Loading />;
-  }
 
   if (userAuthState === UserAuthState.SIGNED_OUT && !allowAnonymous) {
     return (
@@ -86,5 +83,12 @@ export default function UserGate(props: { allowAnonymous?: boolean; children: Re
     );
   }
 
-  return <>{children}</>;
+  if (
+    userAuthState === UserAuthState.SIGNED_IN ||
+    (userAuthState === UserAuthState.SIGNED_IN_ANONOMOUSLY && allowAnonymous)
+  ) {
+    return <>{children}</>;
+  }
+
+  return <Loading />;
 }
