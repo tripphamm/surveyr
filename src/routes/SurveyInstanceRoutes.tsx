@@ -56,11 +56,10 @@ export default function SurveyInstanceRoutes() {
       <Route
         exact
         path={`${match.path}`}
-        render={props => <Redirect {...props} to={getSurveyQuestionPath()} />}
+        render={props => <Redirect {...props} to={getSurveyQuestionPath(':shareCode')} />}
       />
       <Route
-        path={getSurveyQuestionPath()}
-        // we shouldn't need the non-null-assertion here, because we've checked if value is undefined...
+        path={getSurveyQuestionPath(':shareCode')}
         render={props => (
           <SurveyQuestion
             {...props}
@@ -70,7 +69,7 @@ export default function SurveyInstanceRoutes() {
         )}
       />
       <Route
-        path={getSurveyResultsPath()}
+        path={getSurveyResultsPath(':shareCode')}
         render={props => (
           <SurveyResults {...props} surveyInstance={surveyInstance.value!} survey={survey.value!} />
         )}

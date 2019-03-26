@@ -1,17 +1,15 @@
 import React from 'react';
 import uuidv4 from 'uuid/v4';
-import { RouteComponentProps } from 'react-router-dom';
 
 import { UnsavedSurvey } from '../state/state';
 import SurveyEditor from './SurveyEditor';
 import useRouter from '../hooks/useRouter';
 import { getSurveysPath } from '../utils/routeUtil';
+import UserGate from '../UserGate';
 
-export default function CreateSurvey(
-  props: RouteComponentProps & {
-    saveSurvey: (unsavedSurvey: UnsavedSurvey) => Promise<void>;
-  },
-) {
+export default function CreateSurvey(props: {
+  saveSurvey: (unsavedSurvey: UnsavedSurvey) => Promise<void>;
+}) {
   const { saveSurvey } = props;
   const { history } = useRouter();
   const initialSurveyData: UnsavedSurvey = {
@@ -26,12 +24,14 @@ export default function CreateSurvey(
   };
 
   return (
-    <SurveyEditor
-      initialSurveyData={initialSurveyData}
-      onSave={async (unsavedSurvey: UnsavedSurvey) => {
-        await saveSurvey(unsavedSurvey);
-        history.push(getSurveysPath());
-      }}
-    />
+    <UserGate>
+      <SurveyEditor
+        initialSurveyData={initialSurveyData}
+        onSave={async (unsavedSurvey: UnsavedSurvey) => {
+          await saveSurvey(unsavedSurvey);
+          history.push(getSurveysPath());
+        }}
+      />
+    </UserGate>
   );
 }
