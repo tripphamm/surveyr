@@ -68,7 +68,10 @@ export default function PresenterInfo(props: { surveyInstances: NormalizedSurvey
                 <ListItemAvatar>
                   <Avatar src={surveyCodeIcon} alt="Survey-code sample" />
                 </ListItemAvatar>
-                <ListItemText primary={shareCode} secondary="Your survey code" />
+                <ListItemText
+                  primary={shareCode}
+                  secondary="Your survey code. Don't worry, it'll be on the next screen too"
+                />
               </ListItem>
             </CopyToClipboard>
             <CopyToClipboard
@@ -81,7 +84,7 @@ export default function PresenterInfo(props: { surveyInstances: NormalizedSurvey
                 </ListItemAvatar>
                 <ListItemText
                   primary={`https://srvy.live/results/${shareCode}`}
-                  secondary="Use this to show the live-results on another screen"
+                  secondary="Use this to show the live-results on another screen. Preferably the biggest screen in the room"
                 />
               </ListItem>
             </CopyToClipboard>
