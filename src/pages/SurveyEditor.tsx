@@ -133,6 +133,7 @@ export default function SurveyEditor(props: {
 }) {
   const { initialSurveyData, onSave, onDelete } = props;
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [state, dispatchLocal] = useReducer<
     React.Reducer<
       { survey: UnsavedSurvey; autoFocusedId?: string },
@@ -167,8 +168,9 @@ export default function SurveyEditor(props: {
           color="primary"
           onClick={async () => {
             setSaving(true);
-            onSave(unsavedSurvey);
-            setSaving(false);
+            await onSave(unsavedSurvey);
+            // todo: this feels bad, maybe we can make the save effect more declarative with useEffect
+            // don't setSaving(false) here because onSave unmounts this component
           }}
           disabled={
             // has a title,
@@ -176,6 +178,7 @@ export default function SurveyEditor(props: {
             // all questions have text and at least one answer,
             // all answers have text
             saving ||
+            deleting ||
             title.length === 0 ||
             questions.length === 0 ||
             questions.some(
@@ -300,7 +303,12 @@ export default function SurveyEditor(props: {
           fullWidth
           variant="contained"
           color="secondary"
-          onClick={() => onDelete(unsavedSurvey.id!)}
+          disabled={saving || deleting}
+          onClick={async () => {
+            setDeleting(true);
+            await onDelete(unsavedSurvey.id!);
+            // don't setDeleting(false) here because onDelete unmounts this component
+          }}
         >
           Delete
         </Button>
