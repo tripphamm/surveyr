@@ -50,12 +50,8 @@ workflows:
   build-and-deploy:
     jobs:
       - notify-rollbar-deploy-started
-      - build:
-          requires:
-            - notify-rollbar-deploy-started
+      - build
       - deploy-production:
           requires:
             - build
-      - notify-rollbar-deploy-finished:
-          requires:
-            - deploy-production
+      - notify-rollbar-deploy-finished
