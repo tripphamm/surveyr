@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Loadable, SurveyInstance } from '../state/state';
 import { firestore } from '../services/firebaseService';
 import { NormalizedSurveyInstances } from '../state/state';
+import { logError } from '../utils/errorLogger';
 
 export default function useMySurveyInstances(
   userId: string,
@@ -50,13 +51,15 @@ export default function useMySurveyInstances(
               {},
             );
 
+            throw new Error('TEST Error');
+
             setMySurveyInstances({
               loading: false,
               errorCode: undefined,
               value: normalizedSurveyInstances,
             });
           } catch (error) {
-            console.error('useMySurveyInstances', error);
+            logError('useMySurveyInstances', error);
             setMySurveyInstances({
               loading: false,
               errorCode: error.toString(),
@@ -68,7 +71,7 @@ export default function useMySurveyInstances(
         unsubscribe();
       };
     } catch (error) {
-      console.error('useMySurveyInstances', error);
+      logError('useMySurveyInstances', error);
       setMySurveyInstances({
         loading: false,
         errorCode: error.toString(),
@@ -89,7 +92,7 @@ export default function useMySurveyInstances(
           shareCode,
         });
       } catch (error) {
-        console.error('addSurveyInstances', error);
+        logError('addSurveyInstances', error);
         setMySurveyInstances({
           ...mySurveyInstances,
           errorCode: error.toString(),
@@ -109,7 +112,7 @@ export default function useMySurveyInstances(
         .doc(surveyInstanceId)
         .update(surveyInstanceUpdate);
     } catch (error) {
-      console.error('updateSurveyInstances', error);
+      logError('updateSurveyInstances', error);
       setMySurveyInstances({
         ...mySurveyInstances,
         errorCode: error.toString(),
@@ -137,7 +140,7 @@ export default function useMySurveyInstances(
 
       batch.commit();
     } catch (error) {
-      console.error('deleteSurveyInstances', error);
+      logError('deleteSurveyInstances', error);
       // todo: handle this error in the UI?
     }
   };

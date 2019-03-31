@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { firestore } from '../services/firebaseService';
 import { NormalizedSurveys, Subscribable, Survey, UnsavedSurvey } from '../state/state';
 import { normalizeSurvey } from '../utils/normalizationUtil';
+import { logError } from '../utils/errorLogger';
 
 export default function useMySurveys(
   userId: string,
@@ -43,7 +44,7 @@ export default function useMySurveys(
               value: mySurveys,
             });
           } catch (error) {
-            console.error('useMySurveys', error);
+            logError('useMySurveys', error);
             setMySurveys({
               loading: false,
               errorCode: error.toString(),
@@ -56,7 +57,7 @@ export default function useMySurveys(
         unsubscribe();
       };
     } catch (error) {
-      console.error('useMySurveys', error);
+      logError('useMySurveys', error);
       setMySurveys({
         loading: false,
         errorCode: error.toString(),
@@ -78,7 +79,7 @@ export default function useMySurveys(
           await ref.add(survey);
         }
       } catch (error) {
-        console.error('saveSurvey', error);
+        logError('saveSurvey', error);
         // todo: handle this error in the UI
       }
     },
@@ -92,7 +93,7 @@ export default function useMySurveys(
         .doc(surveyId)
         .delete();
     } catch (error) {
-      console.error('deleteSurvey', error);
+      logError('deleteSurvey', error);
       // todo: handle this error in the UI
     }
   };

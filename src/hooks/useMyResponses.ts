@@ -7,6 +7,7 @@ import {
   UnsavedSurveyResponse,
   SurveyResponse,
 } from '../state/state';
+import { logError } from '../utils/errorLogger';
 
 export default function useMyResponses(
   userId: string,
@@ -49,7 +50,7 @@ export default function useMyResponses(
               value: normalizedResponses,
             });
           } catch (error) {
-            console.error('useMyResponses', error);
+            logError('useMyResponses', error);
             setmyResponses({
               loading: false,
               errorCode: error.toString(),
@@ -62,7 +63,7 @@ export default function useMyResponses(
         unsubscribe();
       };
     } catch (error) {
-      console.error('useMyResponses', error);
+      logError('useMyResponses', error);
       setmyResponses({
         loading: false,
         errorCode: error.toString(),

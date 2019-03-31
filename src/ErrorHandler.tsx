@@ -1,6 +1,7 @@
 import React from 'react';
 import ErrorMessage from './pages/ErrorMessage';
 import NotFound from './pages/NotFound';
+import { logError } from './utils/errorLogger';
 
 interface ErrorHandlerState {
   errorType?: 'ERROR' | 'NOT_FOUND';
@@ -17,12 +18,13 @@ export default class ErrorHandler extends React.Component<
     errorType: undefined,
   };
 
-  componentDidCatch(error: any) {
+  componentDidCatch(error: Error & { code?: string }) {
     if (error && error.code === 'NOT_FOUND') {
       this.setState({ errorType: error.code });
       return;
     }
 
+    logError('React Error Boundary engaged.', error);
     this.setState({ errorType: 'ERROR' });
   }
 

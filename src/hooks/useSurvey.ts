@@ -4,6 +4,7 @@ import { firestore } from '../services/firebaseService';
 import ErrorCode from '../settings/ErrorCode';
 import { Survey, NormalizedSurvey, Subscribable } from '../state/state';
 import { normalizeSurvey } from '../utils/normalizationUtil';
+import { logError } from '../utils/errorLogger';
 
 export default function useSurvey(surveyId?: string) {
   const [survey, setSurvey] = useState<Subscribable<NormalizedSurvey>>({
@@ -41,7 +42,7 @@ export default function useSurvey(surveyId?: string) {
               errorCode: undefined,
             });
           } catch (error) {
-            console.error('useSurvey', error);
+            logError('useSurvey', error);
             setSurvey({
               loading: false,
               errorCode: error.toString(),
@@ -54,7 +55,7 @@ export default function useSurvey(surveyId?: string) {
         unsubscribe();
       };
     } catch (error) {
-      console.error('useSurvey', error);
+      logError('useSurvey', error);
       setSurvey({
         loading: false,
         errorCode: error.toString(),

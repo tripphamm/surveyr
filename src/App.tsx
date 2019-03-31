@@ -7,6 +7,7 @@ import Routes from './routes/Routes';
 import { createSetUserSuccessAction, createSetUserFailureAction } from './state/actions';
 import ErrorHandler from './ErrorHandler';
 import Loading from './pages/Loading';
+import { logError } from './utils/errorLogger';
 
 export default function App() {
   const dispatch = useDispatch();
@@ -28,7 +29,7 @@ export default function App() {
           );
         }
       } catch (error) {
-        console.error('setUser', error);
+        logError('setUser', error);
         dispatch(createSetUserFailureAction(error.toString()));
       }
     });

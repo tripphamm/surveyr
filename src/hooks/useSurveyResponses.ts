@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
 import { firestore } from '../services/firebaseService';
 import { Subscribable, SurveyResponsesByQuestionId, SurveyResponse } from '../state/state';
+import { logError } from '../utils/errorLogger';
 
 export default function useSurveyResponses(surveyInstanceId?: string) {
   const [surveyResponses, setsurveyResponses] = useState<Subscribable<SurveyResponsesByQuestionId>>(
@@ -50,7 +51,7 @@ export default function useSurveyResponses(surveyInstanceId?: string) {
               value: normalizedResponses,
             });
           } catch (error) {
-            console.error('useSurveyResponses', error);
+            logError('useSurveyResponses', error);
             setsurveyResponses({
               loading: false,
               errorCode: error.toString(),
@@ -63,7 +64,7 @@ export default function useSurveyResponses(surveyInstanceId?: string) {
         unsubscribe();
       };
     } catch (error) {
-      console.error('useSurveyResponses', error);
+      logError('useSurveyResponses', error);
       setsurveyResponses({
         loading: false,
         errorCode: error.toString(),

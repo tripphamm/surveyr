@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { firestore } from '../services/firebaseService';
 import ErrorCode from '../settings/ErrorCode';
 import { Subscribable, SurveyInstance } from '../state/state';
+import { logError } from '../utils/errorLogger';
 
 export default function useSurveyInstance(shareCode?: string) {
   const [surveyInstance, setSurveyInstance] = useState<Subscribable<SurveyInstance>>({
@@ -46,7 +47,7 @@ export default function useSurveyInstance(shareCode?: string) {
               value: surveyInstance,
             });
           } catch (error) {
-            console.error('useSurveyInstance', error);
+            logError('useSurveyInstance', error);
             setSurveyInstance({
               loading: false,
               errorCode: error.toString(),
@@ -59,7 +60,7 @@ export default function useSurveyInstance(shareCode?: string) {
         unsubscribe();
       };
     } catch (error) {
-      console.error('useSurveyInstance', error);
+      logError('useSurveyInstance', error);
       setSurveyInstance({
         loading: false,
         errorCode: error.toString(),
