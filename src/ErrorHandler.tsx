@@ -24,7 +24,6 @@ export default class ErrorHandler extends React.Component<
       return;
     }
 
-    logError('React Error Boundary engaged.', error);
     this.setState({ errorType: 'ERROR' });
   }
 

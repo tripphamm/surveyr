@@ -51,8 +51,6 @@ export default function useMySurveyInstances(
               {},
             );
 
-            throw new Error('TEST Error');
-
             setMySurveyInstances({
               loading: false,
               errorCode: undefined,
