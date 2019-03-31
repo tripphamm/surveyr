@@ -108,7 +108,10 @@ export default function Surveys(props: {
         </div>
       )}
 
-      <FloatingAddButton onClick={() => history.push(getCreateSurveyPath())} />
+      <FloatingAddButton
+        data-test-id="create-survey-fab"
+        onClick={() => history.push(getCreateSurveyPath())}
+      />
     </Shell>
   );
 }

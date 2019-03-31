@@ -14,7 +14,7 @@ export const getHowItWorksPath = () => [ROOT, 'how-it-works'].join('/');
 // host
 export const getHostPath = () => [ROOT, HOST].join('/');
 export const getSurveysPath = () => [ROOT, HOST, SURVEYS].join('/');
-export const getCreateSurveyPath = () => [ROOT, HOST, SURVEYS, 'add'].join('/');
+export const getCreateSurveyPath = () => [ROOT, HOST, SURVEYS, 'create'].join('/');
 export const getEditSurveyPath = (surveyId: string) =>
   [ROOT, HOST, SURVEYS, surveyId, 'edit'].join('/');
 export const getSurveyPresenterPath = (shareCode: string) =>

@@ -197,6 +197,9 @@ export default function SurveyEditor(props: {
         {"Let's make a survey"}
       </Typography>
       <TextField
+        inputProps={{
+          'data-test-id': 'survey-title-textfield',
+        }}
         fullWidth
         autoFocus={autoFocusedId === undefined}
         variant="outlined"
@@ -222,6 +225,9 @@ export default function SurveyEditor(props: {
             disableTypography
             title={
               <TextField
+                inputProps={{
+                  'data-test-id': `survey-question-q${qIndex}-textfield`,
+                }}
                 fullWidth
                 autoFocus={autoFocusedId === question.id}
                 variant="outlined"
@@ -242,6 +248,9 @@ export default function SurveyEditor(props: {
                 <ListItem key={`answer-${qIndex}-${aIndex}`}>
                   <ListItemText>
                     <TextField
+                      inputProps={{
+                        'data-test-id': `survey-answer-q${qIndex}-a${aIndex}-textfield`,
+                      }}
                       fullWidth
                       variant="outlined"
                       label={`Answer ${aIndex + 1}`}
@@ -279,6 +288,7 @@ export default function SurveyEditor(props: {
           <CardActions>
             <div style={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
               <IconButton
+                data-test-id="add-answer-button"
                 onClick={() =>
                   dispatchLocal({ type: 'ADD_ANSWER', payload: { questionIndex: qIndex } })
                 }
@@ -292,7 +302,10 @@ export default function SurveyEditor(props: {
       <Card style={{ marginBottom: 15 }}>
         <CardContent>
           <div style={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-            <IconButton onClick={() => dispatchLocal({ type: 'ADD_QUESTION' })}>
+            <IconButton
+              data-test-id="add-question-button"
+              onClick={() => dispatchLocal({ type: 'ADD_QUESTION' })}
+            >
               <Add />
             </IconButton>
           </div>

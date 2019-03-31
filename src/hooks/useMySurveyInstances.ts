@@ -18,6 +18,7 @@ export default function useMySurveyInstances(
       return;
     }
 
+    // todo: should this go before or after the bail-out
     setMySurveyInstances({
       loading: true,
     });

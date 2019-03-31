@@ -65,7 +65,7 @@ export default function Join() {
             onChange={e => setShareCode(e.target.value)}
             autoComplete="off"
           />
-          <Link to={getHostPath()}>
+          <Link data-test-id="host-survey-link" to={getHostPath()}>
             <Typography color="primary">{'I want to host a survey'}</Typography>
           </Link>
         </div>
