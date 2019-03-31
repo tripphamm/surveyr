@@ -14,6 +14,13 @@ if (process.env.NODE_ENV === 'production') {
     captureUnhandledRejections: true,
     payload: {
       environment: process.env.NODE_ENV,
+      client: {
+        javascript: {
+          // helps Rollbar determine which source-maps to use
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          code_version: process.env.REACT_APP_VERSION || 'development',
+        },
+      },
     },
   });
 
