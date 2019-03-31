@@ -1,10 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { StoreContext } from 'redux-react-hook';
 import rollbar from 'rollbar';
 
 import App from './App';
-import { getStore } from './state/store';
 import { setRollbarInstance } from './utils/errorLogger';
 
 if (process.env.NODE_ENV === 'production') {
@@ -27,9 +25,4 @@ if (process.env.NODE_ENV === 'production') {
   setRollbarInstance(rollbarInstance);
 }
 
-ReactDOM.render(
-  <StoreContext.Provider value={getStore()}>
-    <App />
-  </StoreContext.Provider>,
-  document.getElementById('root'),
-);
+ReactDOM.render(<App />, document.getElementById('root'));

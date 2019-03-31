@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import firebase from 'firebase/app';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
-import { useMappedState } from 'redux-react-hook';
 import { Link } from 'react-router-dom';
 import firebaseui from 'firebaseui';
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
@@ -10,23 +9,17 @@ import withTheme from '@material-ui/core/styles/withTheme';
 
 import { auth } from '../services/firebaseService';
 import Shell from '../components/Shell';
-import { State } from '../state/state';
 import EmojiIcon from '../components/EmojiIcon';
 import useRouter from '../hooks/useRouter';
 import { getJoinSurveyPath } from '../utils/routeUtil';
-
-const mapState = (state: State) => {
-  return {
-    user: state.user.value,
-  };
-};
+import useSession from '../hooks/useSession';
 
 const ui = new firebaseui.auth.AuthUI(auth);
 
 function Auth(props: { theme: Theme }) {
   const { theme } = props;
 
-  const { user } = useMappedState(mapState);
+  const { user } = useSession();
   const { history } = useRouter();
 
   // if the user is already logged in with an anonymous account,

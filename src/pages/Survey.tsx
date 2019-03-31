@@ -18,9 +18,9 @@ import Shell from '../components/Shell';
 import useRouter from '../hooks/useRouter';
 import EmojiIcon from '../components/EmojiIcon';
 import FloatingEditButton from '../components/FloatingEditButton';
-import { NormalizedSurveys, NormalizedSurveyInstances } from '../state/state';
 import NotFound from './NotFound';
 import { getSurveyPresenterInfoPath, getEditSurveyPath, getSurveysPath } from '../utils/routeUtil';
+import { NormalizedSurveys, NormalizedSurveyInstances } from '../entities';
 
 export default function Survey(props: {
   surveys: NormalizedSurveys;

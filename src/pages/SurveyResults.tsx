@@ -13,7 +13,7 @@ import EmojiIcon from '../components/EmojiIcon';
 import AnimatedBar from '../components/AnimatedBar';
 import useSurveyResponses from '../hooks/useSurveyResponses';
 import Loading from './Loading';
-import { SurveyInstance, NormalizedSurvey } from '../state/state';
+import { SurveyInstance, NormalizedSurvey } from '../entities';
 import UserGate from '../UserGate';
 import { getSurveyQuestionPath, getSurveyResultsPath } from '../utils/routeUtil';
 

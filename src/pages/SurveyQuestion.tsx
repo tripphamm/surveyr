@@ -10,25 +10,18 @@ import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
 import Clear from '@material-ui/icons/Clear';
 import RadioButtonUnchecked from '@material-ui/icons/RadioButtonUnchecked';
-import { useMappedState } from 'redux-react-hook';
 
 import Shell from '../components/Shell';
 import EmojiIcon from '../components/EmojiIcon';
 import useRouter from '../hooks/useRouter';
 import { radioButtonIconSize } from '../settings/magicNumbers';
 import useMyResponses from '../hooks/useMyResponses';
-import { State, SurveyInstance, NormalizedSurvey } from '../state/state';
 import Loading from './Loading';
 import UserGate from '../UserGate';
 import Button from '@material-ui/core/Button';
 import { getSurveyResultsPath, getSurveyQuestionPath } from '../utils/routeUtil';
-
-const mapState = (state: State) => {
-  return {
-    // we assume that user has a value since we shouldn't render this component otherwise
-    user: state.user.value!,
-  };
-};
+import { SurveyInstance, NormalizedSurvey } from '../entities';
+import useSession from '../hooks/useSession';
 
 export default function SurveyQuestion(props: {
   surveyInstance: SurveyInstance;
@@ -41,7 +34,11 @@ export default function SurveyQuestion(props: {
     value: null,
   });
 
-  const { user } = useMappedState(mapState);
+  const { user } = useSession();
+  if (user === null || user === undefined) {
+    throw new Error('Missing user on SurveyQuestion page');
+  }
+
   const { history, match } = useRouter<{ shareCode: string }>();
   const { params } = match;
   const { shareCode } = params;

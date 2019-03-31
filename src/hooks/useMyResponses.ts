@@ -6,7 +6,7 @@ import {
   MySurveyResponsesByQuestionId,
   UnsavedSurveyResponse,
   SurveyResponse,
-} from '../state/state';
+} from '../entities';
 import { logError } from '../utils/errorLogger';
 
 export default function useMyResponses(

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 
 import { firestore } from '../services/firebaseService';
-import { Subscribable, SurveyResponsesByQuestionId, SurveyResponse } from '../state/state';
 import { logError } from '../utils/errorLogger';
+import { Subscribable, SurveyResponsesByQuestionId, SurveyResponse } from '../entities';
 
 export default function useSurveyResponses(surveyInstanceId?: string) {
   const [surveyResponses, setsurveyResponses] = useState<Subscribable<SurveyResponsesByQuestionId>>(

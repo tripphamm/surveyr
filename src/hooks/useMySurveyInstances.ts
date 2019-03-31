@@ -1,32 +1,23 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
-import { Loadable, SurveyInstance } from '../state/state';
+import { SurveyInstance, NormalizedSurveyInstances, Subscribable } from '../entities';
 import { firestore } from '../services/firebaseService';
-import { NormalizedSurveyInstances } from '../state/state';
 import { logError } from '../utils/errorLogger';
 
 export default function useMySurveyInstances(
-  userId: string,
-): [
-  Loadable<NormalizedSurveyInstances>,
-  {
-    addSurveyInstance: (
-      surveyId: string,
-      initialQuestionId: string,
-      shareCode: string,
-    ) => Promise<void>;
-    updateSurveyInstance: (
-      surveyInstanceId: string,
-      surveyInstanceUpdate: Partial<SurveyInstance>,
-    ) => Promise<void>;
-    deleteSurveyInstance: (surveyInstanceId: string) => Promise<void>;
-  }
-] {
-  const [mySurveyInstances, setMySurveyInstances] = useState<Loadable<NormalizedSurveyInstances>>({
+  userId?: string,
+): Subscribable<NormalizedSurveyInstances> {
+  const [mySurveyInstances, setMySurveyInstances] = useState<
+    Subscribable<NormalizedSurveyInstances>
+  >({
     loading: true,
   });
 
   useEffect(() => {
+    if (userId === undefined) {
+      return;
+    }
+
     setMySurveyInstances({
       loading: true,
     });
@@ -78,70 +69,5 @@ export default function useMySurveyInstances(
     }
   }, [userId]);
 
-  const addSurveyInstance = useCallback(
-    async (surveyId: string, initialQuestionId: string, shareCode: string) => {
-      try {
-        await firestore.collection('survey-instances').add({
-          authorId: userId,
-          surveyId: surveyId,
-          currentQuestionId: initialQuestionId,
-          acceptAnswers: true,
-          showResults: true,
-          shareCode,
-        });
-      } catch (error) {
-        logError('addSurveyInstances', error);
-        setMySurveyInstances({
-          ...mySurveyInstances,
-          errorCode: error.toString(),
-        });
-      }
-    },
-    [mySurveyInstances, userId],
-  );
-
-  const updateSurveyInstance = async (
-    surveyInstanceId: string,
-    surveyInstanceUpdate: Partial<SurveyInstance>,
-  ) => {
-    try {
-      await firestore
-        .collection('survey-instances')
-        .doc(surveyInstanceId)
-        .update(surveyInstanceUpdate);
-    } catch (error) {
-      logError('updateSurveyInstances', error);
-      setMySurveyInstances({
-        ...mySurveyInstances,
-        errorCode: error.toString(),
-      });
-    }
-  };
-
-  const deleteSurveyInstance = async (surveyInstanceId: string) => {
-    try {
-      const batch = firestore.batch();
-
-      const surveyInstanceDocRef = firestore.collection('survey-instances').doc(surveyInstanceId);
-
-      batch.delete(surveyInstanceDocRef);
-
-      const surveyResponsesSnapshot = await firestore
-        .collection('survey-responses')
-        .doc(surveyInstanceId)
-        .collection('answers')
-        .get();
-
-      surveyResponsesSnapshot.docs.forEach(surveyResponseDoc => {
-        batch.delete(surveyResponseDoc.ref);
-      });
-
-      batch.commit();
-    } catch (error) {
-      logError('deleteSurveyInstances', error);
-      // todo: handle this error in the UI?
-    }
-  };
-
-  return [mySurveyInstances, { addSurveyInstance, updateSurveyInstance, deleteSurveyInstance }];
+  return mySurveyInstances;
 }

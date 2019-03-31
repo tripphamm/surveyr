@@ -18,9 +18,9 @@ import Delete from '@material-ui/icons/Delete';
 import Clear from '@material-ui/icons/Clear';
 
 import useRouter from '../hooks/useRouter';
-import { UnsavedSurvey, Question, Answer } from '../state/state';
 import Shell from '../components/Shell';
 import EmojiIcon from '../components/EmojiIcon';
+import { UnsavedSurvey, Question, Answer, Survey } from '../entities';
 
 const reduce = (
   state: { survey: UnsavedSurvey; autoFocusedId?: string },

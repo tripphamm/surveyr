@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useMappedState } from 'redux-react-hook';
 
-import { State, User } from './state/state';
+import { User, Subscribable, Nullable } from './entities';
 import { auth } from './services/firebaseService';
 import Loading from './pages/Loading';
+import useSession from './hooks/useSession';
 
 const Auth = React.lazy(() => import('./pages/Auth'));
 
@@ -26,18 +26,12 @@ const getUserAuthState = (user: User | null | undefined) => {
   return UserAuthState.UNKNOWN;
 };
 
-const mapState = (state: State) => {
-  return {
-    user: state.user.value,
-  };
-};
-
 export default function UserGate(props: { allowAnonymous?: boolean; children: React.ReactNode }) {
   const [authenticatingAnonymously, setAuthenticatingAnonymously] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const { allowAnonymous = false, children } = props;
+  const { user } = useSession();
 
-  const { user } = useMappedState(mapState);
+  const { allowAnonymous = false, children } = props;
 
   const userAuthState = getUserAuthState(user);
 

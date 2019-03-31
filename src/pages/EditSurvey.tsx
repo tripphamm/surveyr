@@ -2,17 +2,17 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 
 import useRouter from '../hooks/useRouter';
-import { UnsavedSurvey, NormalizedSurveys } from '../state/state';
 import SurveyEditor from './SurveyEditor';
 import { denormalizeSurvey } from '../utils/normalizationUtil';
 import { getSurveyPath, getSurveysPath } from '../utils/routeUtil';
+import { Survey, NormalizedSurveys, UnsavedSurvey } from '../entities';
 
 export default function EditSurvey(props: {
   surveys: NormalizedSurveys;
-  saveSurvey: (unsavedSurvey: UnsavedSurvey) => Promise<void>;
+  updateSurvey: (survey: Survey) => Promise<void>;
   deleteSurvey: (surveyId: string) => Promise<void>;
 }) {
-  const { surveys, saveSurvey, deleteSurvey } = props;
+  const { surveys, updateSurvey, deleteSurvey } = props;
 
   const { match, history } = useRouter<{ surveyId: string }>();
   const { params } = match;
@@ -24,13 +24,15 @@ export default function EditSurvey(props: {
     return <Redirect to={getSurveysPath()} />;
   }
 
-  const initialSurveyData: UnsavedSurvey = denormalizeSurvey(survey);
+  const initialSurveyData: Survey = denormalizeSurvey(survey);
 
   return (
     <SurveyEditor
       initialSurveyData={initialSurveyData}
-      onSave={async (unsavedSurvey: UnsavedSurvey) => {
-        await saveSurvey(unsavedSurvey);
+      onSave={async (survey: UnsavedSurvey) => {
+        // this will actually be a full-blown survey, not an unsaved survey
+        // but Typescript gets mad if this fn tries to accept a Survey type
+        await updateSurvey(survey as Survey);
         history.push(getSurveyPath(surveyId));
       }}
       onDelete={async (surveyId: string) => {

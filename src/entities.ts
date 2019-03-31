@@ -1,4 +1,5 @@
-import { Action, ActionType } from './actions';
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 export interface Loadable<T> {
   loading: boolean;
@@ -11,6 +12,8 @@ export interface Subscribable<T> {
   errorCode?: string;
   value?: T;
 }
+
+export type Nullable<T> = T | null;
 
 export interface SurveyInstance {
   id: string;
@@ -102,33 +105,3 @@ export interface SurveyResponsesByQuestionId {
 export interface NormalizedSurveys {
   [surveyId: string]: NormalizedSurvey;
 }
-
-export interface State {
-  user: Loadable<User | null>;
-}
-
-export const initialState: State = {
-  user: { loading: true },
-};
-
-export const reducer = (state: State = initialState, action: Action): State => {
-  switch (action.type) {
-    case ActionType.SET_USER_SUCCESS:
-      return {
-        ...state,
-        user: { loading: false, errorCode: undefined, value: action.user },
-      };
-    case ActionType.SET_USER_FAILURE:
-      return {
-        ...state,
-        user: { loading: false, errorCode: action.error, value: undefined },
-      };
-    case ActionType.CLEAR_SET_USER_ERROR:
-      return {
-        ...state,
-        user: { ...state.user, errorCode: undefined },
-      };
-    default:
-      return state;
-  }
-};

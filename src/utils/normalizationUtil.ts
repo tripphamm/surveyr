@@ -5,7 +5,7 @@ import {
   NormalizedAnswer,
   Question,
   Answer,
-} from '../state/state';
+} from '../entities';
 
 export function normalizeSurvey(survey: Survey): NormalizedSurvey {
   const normalizedQuestions = survey.questions.reduce<{

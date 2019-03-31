@@ -2,23 +2,21 @@ import React from 'react';
 import withTheme from '@material-ui/core/styles/withTheme';
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
 import Typography from '@material-ui/core/Typography';
-import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
-import Clear from '@material-ui/icons/Clear';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import ArrowForward from '@material-ui/icons/ArrowForward';
 
 import Shell from '../components/Shell';
 import useRouter from '../hooks/useRouter';
 import EmojiIcon from '../components/EmojiIcon';
-import { NormalizedSurveys, NormalizedSurveyInstances, SurveyInstance } from '../state/state';
 import AnimatedBar from '../components/AnimatedBar';
 import useSurveyResponses from '../hooks/useSurveyResponses';
 import { denormalizeSurvey } from '../utils/normalizationUtil';
 import Loading from './Loading';
 import NotFound from './NotFound';
 import { getSurveyPath } from '../utils/routeUtil';
+import { NormalizedSurveys, NormalizedSurveyInstances, SurveyInstance } from '../entities';
 
 function Presenter(props: {
   theme: Theme;

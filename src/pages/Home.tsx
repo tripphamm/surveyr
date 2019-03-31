@@ -1,21 +1,14 @@
 import React from 'react';
 import { Redirect, Link } from 'react-router-dom';
-import { useMappedState } from 'redux-react-hook';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 
-import { State } from '../state/state';
 import Shell from '../components/Shell';
 import { getHostPath, getJoinSurveyPath } from '../utils/routeUtil';
-
-const mapState = (state: State) => {
-  return {
-    user: state.user.value,
-  };
-};
+import useSession from '../hooks/useSession';
 
 export default function Home() {
-  const { user } = useMappedState(mapState);
+  const { user } = useSession();
 
   // if user isn't signed in or they're signed is as anonymous
   // assume that they're just here to take a survey

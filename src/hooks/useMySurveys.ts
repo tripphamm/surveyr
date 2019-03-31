@@ -1,22 +1,20 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
 import { firestore } from '../services/firebaseService';
-import { NormalizedSurveys, Subscribable, Survey, UnsavedSurvey } from '../state/state';
+import { NormalizedSurveys, Subscribable, Survey } from '../entities';
 import { normalizeSurvey } from '../utils/normalizationUtil';
 import { logError } from '../utils/errorLogger';
 
-export default function useMySurveys(
-  userId: string,
-): [
-  Subscribable<NormalizedSurveys>,
-  (survey: UnsavedSurvey) => Promise<void>,
-  (surveyId: string) => Promise<void>
-] {
+export default function useMySurveys(userId?: string): Subscribable<NormalizedSurveys> {
   const [mySurveys, setMySurveys] = useState<Subscribable<NormalizedSurveys>>({
     loading: true,
   });
 
   useEffect(() => {
+    if (userId === undefined) {
+      return;
+    }
+
     setMySurveys({
       loading: true,
     });
@@ -66,37 +64,5 @@ export default function useMySurveys(
     }
   }, [userId]);
 
-  const saveSurvey = useCallback(
-    async (survey: UnsavedSurvey) => {
-      try {
-        const ref = firestore.collection('surveys');
-        if (survey.id) {
-          // this is an edit
-          await ref.doc(survey.id).set(survey);
-        } else {
-          // this is a new survey
-          survey.authorId = userId;
-          await ref.add(survey);
-        }
-      } catch (error) {
-        logError('saveSurvey', error);
-        // todo: handle this error in the UI
-      }
-    },
-    [userId],
-  );
-
-  const deleteSurvey = async (surveyId: string) => {
-    try {
-      await firestore
-        .collection('surveys')
-        .doc(surveyId)
-        .delete();
-    } catch (error) {
-      logError('deleteSurvey', error);
-      // todo: handle this error in the UI
-    }
-  };
-
-  return [mySurveys, saveSurvey, deleteSurvey];
+  return mySurveys;
 }

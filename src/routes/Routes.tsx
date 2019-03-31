@@ -11,7 +11,6 @@ import {
 } from '../utils/routeUtil';
 import HostRoutes from './HostRoutes';
 import SurveyInstanceRoutes from './SurveyInstanceRoutes';
-import Loading from '../pages/Loading';
 import UserGate from '../UserGate';
 
 const Join = React.lazy(() => import('../pages/Join'));

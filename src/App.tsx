@@ -1,47 +1,40 @@
-import React, { useEffect, Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { useDispatch } from 'redux-react-hook';
 
-import { auth } from './services/firebaseService';
 import Routes from './routes/Routes';
-import { createSetUserSuccessAction, createSetUserFailureAction } from './state/actions';
 import ErrorHandler from './ErrorHandler';
 import Loading from './pages/Loading';
-import { logError } from './utils/errorLogger';
+import useAuth from './hooks/useAuth';
+import SessionContext from './SessionContext';
+import useMySurveys from './hooks/useMySurveys';
+import useMySurveyInstances from './hooks/useMySurveyInstances';
 
 export default function App() {
-  const dispatch = useDispatch();
+  const user = useAuth();
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      try {
-        if (user === null) {
-          // user signed out
-          dispatch(createSetUserSuccessAction(null));
-        } else {
-          // user signed in
-          dispatch(
-            createSetUserSuccessAction({
-              id: user.uid,
-              isAnonymous: user.isAnonymous,
-              displayName: user.displayName,
-            }),
-          );
-        }
-      } catch (error) {
-        logError('setUser', error);
-        dispatch(createSetUserFailureAction(error.toString()));
-      }
-    });
+  let userId;
+  if (user.value === null || user.value === undefined) {
+    userId = undefined;
+  } else {
+    userId = user.value.id;
+  }
 
-    return unsubscribe;
-  }, [dispatch]);
+  const surveys = useMySurveys(userId);
+  const surveyInstances = useMySurveyInstances(userId);
+
+  const sessionContext = {
+    user,
+    surveys,
+    surveyInstances,
+  };
 
   return (
     <BrowserRouter>
       <ErrorHandler>
         <Suspense fallback={<Loading />}>
-          <Routes />
+          <SessionContext.Provider value={sessionContext}>
+            <Routes />
+          </SessionContext.Provider>
         </Suspense>
       </ErrorHandler>
     </BrowserRouter>

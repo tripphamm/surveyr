@@ -8,17 +8,15 @@ import Avatar from '@material-ui/core/Avatar';
 import ListItemText from '@material-ui/core/ListItemText';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import Clear from '@material-ui/icons/Clear';
+import IconButton from '@material-ui/core/IconButton';
+import Snackbar from '@material-ui/core/Snackbar';
 
 import Shell from '../components/Shell';
-
 import useRouter from '../hooks/useRouter';
 import { getSurveyPresenterPath } from '../utils/routeUtil';
-
 import surveyCodeIcon from '../images/survey-code-icon.png';
-import Snackbar from '@material-ui/core/Snackbar';
 import { bottomBarHeight, avatarSize } from '../settings/magicNumbers';
-import IconButton from '@material-ui/core/IconButton';
-import { NormalizedSurveyInstances } from '../state/state';
+import { NormalizedSurveyInstances } from '../entities';
 import EmojiIcon from '../components/EmojiIcon';
 
 export default function PresenterInfo(props: { surveyInstances: NormalizedSurveyInstances }) {

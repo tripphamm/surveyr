@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 import { firestore } from '../services/firebaseService';
 import ErrorCode from '../settings/ErrorCode';
-import { Survey, NormalizedSurvey, Subscribable } from '../state/state';
+import { Survey, NormalizedSurvey, Subscribable } from '../entities';
 import { normalizeSurvey } from '../utils/normalizationUtil';
 import { logError } from '../utils/errorLogger';
 

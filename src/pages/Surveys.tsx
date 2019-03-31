@@ -16,7 +16,7 @@ import EmojiIcon from '../components/EmojiIcon';
 import FloatingAddButton from '../components/FloatingAddButton';
 
 import { auth } from '../services/firebaseService';
-import { NormalizedSurveys, NormalizedSurveyInstances } from '../state/state';
+import { NormalizedSurveys, NormalizedSurveyInstances } from '../entities';
 import { getSurveyPath, getCreateSurveyPath, getHowItWorksPath } from '../utils/routeUtil';
 import HowItWorksSteps from '../components/HowItWorksSteps';
 import { floatingActionButtonBufferSize } from '../settings/magicNumbers';

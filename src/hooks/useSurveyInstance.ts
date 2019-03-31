@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 import { firestore } from '../services/firebaseService';
 import ErrorCode from '../settings/ErrorCode';
-import { Subscribable, SurveyInstance } from '../state/state';
+import { Subscribable, SurveyInstance } from '../entities';
 import { logError } from '../utils/errorLogger';
 
 export default function useSurveyInstance(shareCode?: string) {
