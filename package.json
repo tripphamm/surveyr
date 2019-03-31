@@ -41,6 +41,7 @@
     "redux-devtools-extension": "^2.13.8",
     "redux-react-hook": "^3.2.1",
     "redux-thunk": "^2.3.0",
+    "rollbar": "^2.5.4",
     "source-map-explorer": "^1.8.0",
     "typescript": "3.3.3333",
     "uuid": "^3.3.2"

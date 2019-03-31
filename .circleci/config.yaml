@@ -1,0 +1,61 @@
+version: 2.1
+orbs:
+  firebase-deploy: cloudliner/firebase-deploy@0.0.2
+  rollbar: rollbar/deploy@volatile
+jobs:
+  notify-rollbar-deploy-started:
+    docker:
+      - image: circleci/node:lts
+    steps:
+      - rollbar/notify_deploy_started:
+          environment: production
+  build:
+    docker:
+      - image: circleci/node:lts
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-yarn-{{ checksum "yarn.lock" }}
+      - run: yarn install
+      - save_cache:
+          key: v1-yarn-{{ checksum "yarn.lock" }}
+          paths:
+            - ./node_modules
+      - run: yarn build
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - dist
+            - firebase.json
+            - .firebaserc
+            - firestore.rules
+            - firestore.indexes.json
+  deploy-production:
+    docker:
+      - image: circleci/node:lts
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - firebase-deploy/deploy:
+          token: $FIREBASE_TOKEN
+  notify-rollbar-deploy-finished:
+    docker:
+      - image: circleci/node:lts
+    steps:
+      - rollbar/notify_deploy_finished:
+          deploy_id: $ROLLBAR_DEPLOY_ID
+          status: succeeded
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - notify-rollbar-deploy-started
+      - build:
+          requires:
+            - notify-rollbar-deploy-started
+      - deploy-production:
+          requires:
+            - build
+      - notify-rollbar-deploy-finished:
+          requires:
+            - deploy-production
