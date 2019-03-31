@@ -8,7 +8,7 @@ jobs:
       - image: circleci/node:lts
     steps:
       - rollbar/notify_deploy_started:
-        environment: production
+          environment: production
       - checkout
       - restore_cache:
           key: v1-yarn-{{ checksum "yarn.lock" }}
@@ -20,7 +20,7 @@ jobs:
       - run: yarn build
       - firebase-deploy/deploy:
           token: $FIREBASE_TOKEN
-                - rollbar/notify_deploy_finished:
+      - rollbar/notify_deploy_finished:
           deploy_id: $ROLLBAR_DEPLOY_ID
           status: succeeded
 workflows:
@@ -28,4 +28,3 @@ workflows:
   build-and-deploy:
     jobs:
       - build-and-deploy
-
