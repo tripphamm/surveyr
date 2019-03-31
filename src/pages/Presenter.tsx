@@ -19,7 +19,6 @@ import { denormalizeSurvey } from '../utils/normalizationUtil';
 import Loading from './Loading';
 import NotFound from './NotFound';
 import { getSurveyPath } from '../utils/routeUtil';
-import UserGate from '../UserGate';
 
 function Presenter(props: {
   theme: Theme;
@@ -93,112 +92,110 @@ function Presenter(props: {
   const responsesCount = Object.values(responses).reduce((acc, count) => acc + count, 0);
 
   return (
-    <UserGate>
-      <Shell
-        title={`Srvy | ${surveyInstance.shareCode}`}
-        buttonLeftComponent={
-          <IconButton onClick={() => history.push('/')}>
-            <EmojiIcon emojiShortName=":bar_chart:" size={32} />
-          </IconButton>
-        }
-        buttonRightComponent={
-          <Button
-            color="inherit"
-            onClick={async () => {
-              await deleteSurveyInstance(surveyInstance.id);
-              history.push(getSurveyPath(survey.id));
-            }}
-          >
-            End survey
-          </Button>
-        }
-        bottomBarComponent={
-          <div style={{ height: '100%' }}>
-            <Button
-              style={{ height: 'inherit', width: '50%' }}
-              variant="contained"
-              color="primary"
-              disabled={currentQuestion.number === 0}
-              onClick={() => {
-                if (currentQuestion.number > 0) {
-                  updateSurveyInstance(surveyInstance.id, {
-                    currentQuestionId: survey.questions[currentQuestion.number - 1].id,
-                  });
-                }
-              }}
-            >
-              <ArrowBack />
-            </Button>
-            <Button
-              style={{ height: 'inherit', width: '50%' }}
-              variant="contained"
-              color="primary"
-              disabled={currentQuestion.number === survey.questions.length - 1}
-              onClick={() => {
-                if (currentQuestion.number < survey.questions.length - 1) {
-                  updateSurveyInstance(surveyInstance.id, {
-                    currentQuestionId: survey.questions[currentQuestion.number + 1].id,
-                  });
-                }
-              }}
-            >
-              <ArrowForward />
-            </Button>
-          </div>
-        }
-      >
-        <div
-          style={{
-            position: 'relative',
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-evenly',
-            alignItems: 'center',
-
-            textAlign: 'center',
+    <Shell
+      title={`Srvy | ${surveyInstance.shareCode}`}
+      buttonLeftComponent={
+        <IconButton onClick={() => history.push('/')}>
+          <EmojiIcon emojiShortName=":bar_chart:" size={32} />
+        </IconButton>
+      }
+      buttonRightComponent={
+        <Button
+          color="inherit"
+          onClick={async () => {
+            await deleteSurveyInstance(surveyInstance.id);
+            history.push(getSurveyPath(survey.id));
           }}
         >
-          <Typography
-            style={{ position: 'absolute', top: 10, left: 10 }}
-            variant="h5"
-            color="textSecondary"
+          End survey
+        </Button>
+      }
+      bottomBarComponent={
+        <div style={{ height: '100%' }}>
+          <Button
+            style={{ height: 'inherit', width: '50%' }}
+            variant="contained"
+            color="primary"
+            disabled={currentQuestion.number === 0}
+            onClick={() => {
+              if (currentQuestion.number > 0) {
+                updateSurveyInstance(surveyInstance.id, {
+                  currentQuestionId: survey.questions[currentQuestion.number - 1].id,
+                });
+              }
+            }}
           >
-            {shareCode}
-          </Typography>
-
-          <Typography
-            style={{ position: 'absolute', top: 10, right: 10 }}
-            variant="h5"
-            color="textSecondary"
+            <ArrowBack />
+          </Button>
+          <Button
+            style={{ height: 'inherit', width: '50%' }}
+            variant="contained"
+            color="primary"
+            disabled={currentQuestion.number === survey.questions.length - 1}
+            onClick={() => {
+              if (currentQuestion.number < survey.questions.length - 1) {
+                updateSurveyInstance(surveyInstance.id, {
+                  currentQuestionId: survey.questions[currentQuestion.number + 1].id,
+                });
+              }
+            }}
           >
-            {`${responsesCount} response${responsesCount !== 1 ? 's' : ''}`}
-          </Typography>
-
-          <Typography variant="h4">{currentQuestion.value}</Typography>
-
-          {currentQuestion &&
-            Object.values(currentQuestion.possibleAnswers).map(possibleAnswer => (
-              <div key={`presentation-answer-${possibleAnswer.id}`} style={{ width: '100%' }}>
-                <Typography variant="h5">{possibleAnswer.value}</Typography>
-                {/* TypeScript pls. Why do I suddenly need ! */}
-                {surveyInstance.showResults && (
-                  <AnimatedBar
-                    value={
-                      responsesCount > 0 && responses[possibleAnswer.id] !== undefined
-                        ? (100 * responses[possibleAnswer.id]) / responsesCount
-                        : 0
-                    }
-                    color={theme.palette.primary.main}
-                    borderColor={theme.palette.divider}
-                  />
-                )}
-              </div>
-            ))}
+            <ArrowForward />
+          </Button>
         </div>
-      </Shell>
-    </UserGate>
+      }
+    >
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-evenly',
+          alignItems: 'center',
+
+          textAlign: 'center',
+        }}
+      >
+        <Typography
+          style={{ position: 'absolute', top: 10, left: 10 }}
+          variant="h5"
+          color="textSecondary"
+        >
+          {shareCode}
+        </Typography>
+
+        <Typography
+          style={{ position: 'absolute', top: 10, right: 10 }}
+          variant="h5"
+          color="textSecondary"
+        >
+          {`${responsesCount} response${responsesCount !== 1 ? 's' : ''}`}
+        </Typography>
+
+        <Typography variant="h4">{currentQuestion.value}</Typography>
+
+        {currentQuestion &&
+          Object.values(currentQuestion.possibleAnswers).map(possibleAnswer => (
+            <div key={`presentation-answer-${possibleAnswer.id}`} style={{ width: '100%' }}>
+              <Typography variant="h5">{possibleAnswer.value}</Typography>
+              {/* TypeScript pls. Why do I suddenly need ! */}
+              {surveyInstance.showResults && (
+                <AnimatedBar
+                  value={
+                    responsesCount > 0 && responses[possibleAnswer.id] !== undefined
+                      ? (100 * responses[possibleAnswer.id]) / responsesCount
+                      : 0
+                  }
+                  color={theme.palette.primary.main}
+                  borderColor={theme.palette.divider}
+                />
+              )}
+            </div>
+          ))}
+      </div>
+    </Shell>
   );
 }
 

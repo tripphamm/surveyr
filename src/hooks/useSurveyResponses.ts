@@ -50,6 +50,7 @@ export default function useSurveyResponses(surveyInstanceId?: string) {
               value: normalizedResponses,
             });
           } catch (error) {
+            console.error('useSurveyResponses', error);
             setsurveyResponses({
               loading: false,
               errorCode: error.toString(),
@@ -58,8 +59,11 @@ export default function useSurveyResponses(surveyInstanceId?: string) {
           }
         });
 
-      return unsubscribe;
+      return () => {
+        unsubscribe();
+      };
     } catch (error) {
+      console.error('useSurveyResponses', error);
       setsurveyResponses({
         loading: false,
         errorCode: error.toString(),

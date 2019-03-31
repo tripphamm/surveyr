@@ -46,6 +46,7 @@ export default function useSurveyInstance(shareCode?: string) {
               value: surveyInstance,
             });
           } catch (error) {
+            console.error('useSurveyInstance', error);
             setSurveyInstance({
               loading: false,
               errorCode: error.toString(),
@@ -54,8 +55,11 @@ export default function useSurveyInstance(shareCode?: string) {
           }
         });
 
-      return unsubscribe;
+      return () => {
+        unsubscribe();
+      };
     } catch (error) {
+      console.error('useSurveyInstance', error);
       setSurveyInstance({
         loading: false,
         errorCode: error.toString(),

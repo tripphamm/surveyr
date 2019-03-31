@@ -18,10 +18,9 @@ import Shell from '../components/Shell';
 import useRouter from '../hooks/useRouter';
 import EmojiIcon from '../components/EmojiIcon';
 import FloatingEditButton from '../components/FloatingEditButton';
-import { NormalizedSurveys, User, NormalizedSurveyInstances } from '../state/state';
+import { NormalizedSurveys, NormalizedSurveyInstances } from '../state/state';
 import NotFound from './NotFound';
 import { getSurveyPresenterInfoPath, getEditSurveyPath, getSurveysPath } from '../utils/routeUtil';
-import UserGate from '../UserGate';
 
 export default function Survey(props: {
   surveys: NormalizedSurveys;
@@ -56,86 +55,82 @@ export default function Survey(props: {
   }
 
   return (
-    <UserGate>
-      <Shell
-        buttonLeftComponent={
-          <IconButton onClick={() => history.push('/')}>
-            <EmojiIcon emojiShortName=":bar_chart:" size={32} />
-          </IconButton>
-        }
-        buttonRightComponent={
-          <IconButton color="inherit" onClick={() => history.push(getSurveysPath())}>
-            <Icon>
-              <Clear />
-            </Icon>
-          </IconButton>
-        }
-        bottomBarComponent={
-          <Button
-            style={{ height: '100%', width: '100%' }}
-            variant="contained"
-            color="primary"
-            onClick={async () => {
-              const shareCode = uuidv4()
-                .slice(0, 4)
-                .toUpperCase();
+    <Shell
+      buttonLeftComponent={
+        <IconButton onClick={() => history.push('/')}>
+          <EmojiIcon emojiShortName=":bar_chart:" size={32} />
+        </IconButton>
+      }
+      buttonRightComponent={
+        <IconButton color="inherit" onClick={() => history.push(getSurveysPath())}>
+          <Icon>
+            <Clear />
+          </Icon>
+        </IconButton>
+      }
+      bottomBarComponent={
+        <Button
+          style={{ height: '100%', width: '100%' }}
+          variant="contained"
+          color="primary"
+          onClick={async () => {
+            const shareCode = uuidv4()
+              .slice(0, 4)
+              .toUpperCase();
 
-              history.push(getSurveyPresenterInfoPath(shareCode));
+            history.push(getSurveyPresenterInfoPath(shareCode));
 
-              addSurveyInstance(survey.id, defaultQuestion.id, shareCode);
-            }}
-          >
-            Start
-          </Button>
-        }
-      >
-        <Typography variant="display1" gutterBottom>
-          {survey.title}
-        </Typography>
-        {surveyInstancesForThisSurvey.length > 0 && (
-          <Card style={{ marginBottom: 15 }}>
-            <CardHeader title="Active surveys" titleTypographyProps={{ color: 'primary' }} />
-            <CardContent>
-              <List>
-                {surveyInstancesForThisSurvey.map((surveyInstance, i) => (
-                  <ListItem
-                    key={`survey-instance-${i}`}
-                    onClick={() =>
-                      history.push(getSurveyPresenterInfoPath(surveyInstance.shareCode))
-                    }
-                  >
-                    <ListItemText>{surveyInstance.shareCode}</ListItemText>
-                    <ListItemSecondaryAction>
-                      <IconButton
-                        aria-label="Delete"
-                        onClick={() => deleteSurveyInstance(surveyInstance.id)}
-                      >
-                        <Delete />
-                      </IconButton>
-                    </ListItemSecondaryAction>
-                  </ListItem>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
-        )}
+            addSurveyInstance(survey.id, defaultQuestion.id, shareCode);
+          }}
+        >
+          Start
+        </Button>
+      }
+    >
+      <Typography variant="display1" gutterBottom>
+        {survey.title}
+      </Typography>
+      {surveyInstancesForThisSurvey.length > 0 && (
+        <Card style={{ marginBottom: 15 }}>
+          <CardHeader title="Active surveys" titleTypographyProps={{ color: 'primary' }} />
+          <CardContent>
+            <List>
+              {surveyInstancesForThisSurvey.map((surveyInstance, i) => (
+                <ListItem
+                  key={`survey-instance-${i}`}
+                  onClick={() => history.push(getSurveyPresenterInfoPath(surveyInstance.shareCode))}
+                >
+                  <ListItemText>{surveyInstance.shareCode}</ListItemText>
+                  <ListItemSecondaryAction>
+                    <IconButton
+                      aria-label="Delete"
+                      onClick={() => deleteSurveyInstance(surveyInstance.id)}
+                    >
+                      <Delete />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          </CardContent>
+        </Card>
+      )}
 
-        {Object.values(survey.questions).map((question, qIndex) => (
-          <Card key={`question-${qIndex}`} style={{ marginBottom: 15 }}>
-            <CardHeader title={question.value} />
-            <CardContent>
-              <List>
-                {Object.values(question.possibleAnswers).map((answer, aIndex) => (
-                  <ListItem key={`answer-${qIndex}-${aIndex}`}>
-                    <ListItemText primary={answer.value} />
-                  </ListItem>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
-        ))}
-        <FloatingEditButton onClick={() => history.push(getEditSurveyPath(surveyId))} />
-      </Shell>
-    </UserGate>
+      {Object.values(survey.questions).map((question, qIndex) => (
+        <Card key={`question-${qIndex}`} style={{ marginBottom: 15 }}>
+          <CardHeader title={question.value} />
+          <CardContent>
+            <List>
+              {Object.values(question.possibleAnswers).map((answer, aIndex) => (
+                <ListItem key={`answer-${qIndex}-${aIndex}`}>
+                  <ListItemText primary={answer.value} />
+                </ListItem>
+              ))}
+            </List>
+          </CardContent>
+        </Card>
+      ))}
+      <FloatingEditButton onClick={() => history.push(getEditSurveyPath(surveyId))} />
+    </Shell>
   );
 }

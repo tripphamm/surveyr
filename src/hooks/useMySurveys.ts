@@ -43,6 +43,7 @@ export default function useMySurveys(
               value: mySurveys,
             });
           } catch (error) {
+            console.error('useMySurveys', error);
             setMySurveys({
               loading: false,
               errorCode: error.toString(),
@@ -51,8 +52,11 @@ export default function useMySurveys(
           }
         });
 
-      return unsubscribe;
+      return () => {
+        unsubscribe();
+      };
     } catch (error) {
+      console.error('useMySurveys', error);
       setMySurveys({
         loading: false,
         errorCode: error.toString(),
@@ -63,24 +67,34 @@ export default function useMySurveys(
 
   const saveSurvey = useCallback(
     async (survey: UnsavedSurvey) => {
-      const ref = firestore.collection('surveys');
-      if (survey.id) {
-        // this is an edit
-        await ref.doc(survey.id).set(survey);
-      } else {
-        // this is a new survey
-        survey.authorId = userId;
-        await ref.add(survey);
+      try {
+        const ref = firestore.collection('surveys');
+        if (survey.id) {
+          // this is an edit
+          await ref.doc(survey.id).set(survey);
+        } else {
+          // this is a new survey
+          survey.authorId = userId;
+          await ref.add(survey);
+        }
+      } catch (error) {
+        console.error('saveSurvey', error);
+        // todo: handle this error in the UI
       }
     },
     [userId],
   );
 
   const deleteSurvey = async (surveyId: string) => {
-    await firestore
-      .collection('surveys')
-      .doc(surveyId)
-      .delete();
+    try {
+      await firestore
+        .collection('surveys')
+        .doc(surveyId)
+        .delete();
+    } catch (error) {
+      console.error('deleteSurvey', error);
+      // todo: handle this error in the UI
+    }
   };
 
   return [mySurveys, saveSurvey, deleteSurvey];

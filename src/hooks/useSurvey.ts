@@ -25,24 +25,36 @@ export default function useSurvey(surveyId?: string) {
         .collection('surveys')
         .doc(surveyId)
         .onSnapshot(surveySnapshot => {
-          if (!surveySnapshot.exists) {
-            throw ErrorCode.SURVEY_DOES_NOT_EXIST;
+          try {
+            if (!surveySnapshot.exists) {
+              throw ErrorCode.SURVEY_DOES_NOT_EXIST;
+            }
+
+            const survey = surveySnapshot.data() as Survey;
+            survey.id = surveySnapshot.id;
+
+            const normalizedSurvey = normalizeSurvey(survey);
+
+            setSurvey({
+              loading: false,
+              value: normalizedSurvey,
+              errorCode: undefined,
+            });
+          } catch (error) {
+            console.error('useSurvey', error);
+            setSurvey({
+              loading: false,
+              errorCode: error.toString(),
+              value: undefined,
+            });
           }
-
-          const survey = surveySnapshot.data() as Survey;
-          survey.id = surveySnapshot.id;
-
-          const normalizedSurvey = normalizeSurvey(survey);
-
-          setSurvey({
-            loading: false,
-            value: normalizedSurvey,
-            errorCode: undefined,
-          });
         });
 
-      return unsubscribe;
+      return () => {
+        unsubscribe();
+      };
     } catch (error) {
+      console.error('useSurvey', error);
       setSurvey({
         loading: false,
         errorCode: error.toString(),

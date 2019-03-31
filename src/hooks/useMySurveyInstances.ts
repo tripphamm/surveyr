@@ -26,32 +26,49 @@ export default function useMySurveyInstances(
   });
 
   useEffect(() => {
+    setMySurveyInstances({
+      loading: true,
+    });
+
     try {
-      firestore
+      const unsubscribe = firestore
         .collection('survey-instances')
         .where('authorId', '==', userId)
         .onSnapshot(mySurveyInstancesSnapshot => {
-          const surveyInstances = mySurveyInstancesSnapshot.docs.map(doc => {
-            const surveyInstance = doc.data() as SurveyInstance;
-            surveyInstance.id = doc.id;
-            return surveyInstance;
-          });
+          try {
+            const surveyInstances = mySurveyInstancesSnapshot.docs.map(doc => {
+              const surveyInstance = doc.data() as SurveyInstance;
+              surveyInstance.id = doc.id;
+              return surveyInstance;
+            });
 
-          const normalizedSurveyInstances = surveyInstances.reduce<NormalizedSurveyInstances>(
-            (acc, surveyInstance) => {
-              acc[surveyInstance.shareCode] = surveyInstance;
-              return acc;
-            },
-            {},
-          );
+            const normalizedSurveyInstances = surveyInstances.reduce<NormalizedSurveyInstances>(
+              (acc, surveyInstance) => {
+                acc[surveyInstance.shareCode] = surveyInstance;
+                return acc;
+              },
+              {},
+            );
 
-          setMySurveyInstances({
-            loading: false,
-            errorCode: undefined,
-            value: normalizedSurveyInstances,
-          });
+            setMySurveyInstances({
+              loading: false,
+              errorCode: undefined,
+              value: normalizedSurveyInstances,
+            });
+          } catch (error) {
+            console.error('useMySurveyInstances', error);
+            setMySurveyInstances({
+              loading: false,
+              errorCode: error.toString(),
+              value: undefined,
+            });
+          }
         });
+      return () => {
+        unsubscribe();
+      };
     } catch (error) {
+      console.error('useMySurveyInstances', error);
       setMySurveyInstances({
         loading: false,
         errorCode: error.toString(),
@@ -72,6 +89,7 @@ export default function useMySurveyInstances(
           shareCode,
         });
       } catch (error) {
+        console.error('addSurveyInstances', error);
         setMySurveyInstances({
           ...mySurveyInstances,
           errorCode: error.toString(),
@@ -91,6 +109,7 @@ export default function useMySurveyInstances(
         .doc(surveyInstanceId)
         .update(surveyInstanceUpdate);
     } catch (error) {
+      console.error('updateSurveyInstances', error);
       setMySurveyInstances({
         ...mySurveyInstances,
         errorCode: error.toString(),
@@ -99,23 +118,28 @@ export default function useMySurveyInstances(
   };
 
   const deleteSurveyInstance = async (surveyInstanceId: string) => {
-    const batch = firestore.batch();
+    try {
+      const batch = firestore.batch();
 
-    const surveyInstanceDocRef = firestore.collection('survey-instances').doc(surveyInstanceId);
+      const surveyInstanceDocRef = firestore.collection('survey-instances').doc(surveyInstanceId);
 
-    batch.delete(surveyInstanceDocRef);
+      batch.delete(surveyInstanceDocRef);
 
-    const surveyResponsesSnapshot = await firestore
-      .collection('survey-responses')
-      .doc(surveyInstanceId)
-      .collection('answers')
-      .get();
+      const surveyResponsesSnapshot = await firestore
+        .collection('survey-responses')
+        .doc(surveyInstanceId)
+        .collection('answers')
+        .get();
 
-    surveyResponsesSnapshot.docs.forEach(surveyResponseDoc => {
-      batch.delete(surveyResponseDoc.ref);
-    });
+      surveyResponsesSnapshot.docs.forEach(surveyResponseDoc => {
+        batch.delete(surveyResponseDoc.ref);
+      });
 
-    batch.commit();
+      batch.commit();
+    } catch (error) {
+      console.error('deleteSurveyInstances', error);
+      // todo: handle this error in the UI?
+    }
   };
 
   return [mySurveyInstances, { addSurveyInstance, updateSurveyInstance, deleteSurveyInstance }];

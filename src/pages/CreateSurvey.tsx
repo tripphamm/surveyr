@@ -5,7 +5,6 @@ import { UnsavedSurvey } from '../state/state';
 import SurveyEditor from './SurveyEditor';
 import useRouter from '../hooks/useRouter';
 import { getSurveysPath } from '../utils/routeUtil';
-import UserGate from '../UserGate';
 
 export default function CreateSurvey(props: {
   saveSurvey: (unsavedSurvey: UnsavedSurvey) => Promise<void>;
@@ -24,14 +23,12 @@ export default function CreateSurvey(props: {
   };
 
   return (
-    <UserGate>
-      <SurveyEditor
-        initialSurveyData={initialSurveyData}
-        onSave={async (unsavedSurvey: UnsavedSurvey) => {
-          await saveSurvey(unsavedSurvey);
-          history.push(getSurveysPath());
-        }}
-      />
-    </UserGate>
+    <SurveyEditor
+      initialSurveyData={initialSurveyData}
+      onSave={async (unsavedSurvey: UnsavedSurvey) => {
+        await saveSurvey(unsavedSurvey);
+        history.push(getSurveysPath());
+      }}
+    />
   );
 }

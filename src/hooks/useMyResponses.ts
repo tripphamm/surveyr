@@ -49,6 +49,7 @@ export default function useMyResponses(
               value: normalizedResponses,
             });
           } catch (error) {
+            console.error('useMyResponses', error);
             setmyResponses({
               loading: false,
               errorCode: error.toString(),
@@ -57,8 +58,11 @@ export default function useMyResponses(
           }
         });
 
-      return unsubscribe;
+      return () => {
+        unsubscribe();
+      };
     } catch (error) {
+      console.error('useMyResponses', error);
       setmyResponses({
         loading: false,
         errorCode: error.toString(),

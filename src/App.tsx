@@ -28,6 +28,7 @@ export default function App() {
           );
         }
       } catch (error) {
+        console.error('setUser', error);
         dispatch(createSetUserFailureAction(error.toString()));
       }
     });
