@@ -17,11 +17,10 @@ import useRouter from '../hooks/useRouter';
 import { radioButtonIconSize } from '../settings/magicNumbers';
 import useMyResponses from '../hooks/useMyResponses';
 import Loading from './Loading';
-import UserGate from '../UserGate';
 import Button from '@material-ui/core/Button';
 import { getSurveyResultsPath, getSurveyQuestionPath } from '../utils/routeUtil';
 import { SurveyInstance, NormalizedSurvey } from '../entities';
-import useSession from '../hooks/useSession';
+import useUser from '../hooks/useUser';
 
 export default function SurveyQuestion(props: {
   surveyInstance: SurveyInstance;
@@ -34,10 +33,7 @@ export default function SurveyQuestion(props: {
     value: null,
   });
 
-  const { user } = useSession();
-  if (user === null || user === undefined) {
-    throw new Error('Missing user on SurveyQuestion page');
-  }
+  const { user } = useUser();
 
   const { history, match } = useRouter<{ shareCode: string }>();
   const { params } = match;
@@ -64,99 +60,97 @@ export default function SurveyQuestion(props: {
   const currentResponse = myResponses.value![currentQuestion.id];
 
   return (
-    <UserGate allowAnonymous>
-      <Shell
-        title={`Srvy | ${surveyInstance.shareCode}`}
-        buttonLeftComponent={
-          <IconButton onClick={() => history.push('/')}>
-            <EmojiIcon emojiShortName=":bar_chart:" size={32} />
-          </IconButton>
-        }
-        buttonRightComponent={
-          <IconButton color="inherit" onClick={() => history.push('/')}>
-            <Icon>
-              <Clear />
-            </Icon>
-          </IconButton>
-        }
-        bottomBarComponent={
-          <div style={{ height: '100%' }}>
-            <Button
-              style={{ height: 'inherit', width: '50%' }}
-              variant="contained"
-              color="primary"
-              disabled
-              onClick={() => {
-                history.push(getSurveyQuestionPath(shareCode));
-              }}
-            >
-              My answer
-            </Button>
-            <Button
-              style={{ height: 'inherit', width: '50%' }}
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                history.push(getSurveyResultsPath(shareCode));
-              }}
-            >
-              Results
-            </Button>
-          </div>
-        }
-      >
-        <div
-          style={{
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-evenly',
-          }}
-        >
-          <div style={{ textAlign: 'center' }}>
-            <Typography variant="h4">{currentQuestion.value}</Typography>
-          </div>
-          <FormControl>
-            <FormLabel>Your answer</FormLabel>
-            <RadioGroup
-              aria-label="Your answer"
-              name={`question-${currentQuestion.id}-answers`}
-              value={currentResponse ? currentResponse.answerId : undefined}
-              onChange={async e => {
-                const value = (e.target as HTMLInputElement).value;
-                setSubmission({ submitting: true, value });
-                await submitAnswer({
-                  ...currentResponse,
-                  questionId: currentQuestion.id,
-                  answerId: value,
-                });
-                setSubmission({ submitting: false, value: null });
-              }}
-            >
-              {Object.entries(currentQuestion.possibleAnswers).map(([answerId, answer]) => (
-                <FormControlLabel
-                  key={answerId}
-                  disabled={submission.submitting}
-                  value={answerId}
-                  control={
-                    <Radio
-                      checked={currentResponse && answerId === currentResponse.answerId}
-                      icon={
-                        submission.submitting && answerId === submission.value ? (
-                          <CircularProgress size={radioButtonIconSize} />
-                        ) : (
-                          <RadioButtonUnchecked />
-                        )
-                      }
-                    />
-                  }
-                  label={answer.value}
-                />
-              ))}
-            </RadioGroup>
-          </FormControl>
+    <Shell
+      title={`Srvy | ${surveyInstance.shareCode}`}
+      buttonLeftComponent={
+        <IconButton onClick={() => history.push('/')}>
+          <EmojiIcon emojiShortName=":bar_chart:" size={32} />
+        </IconButton>
+      }
+      buttonRightComponent={
+        <IconButton color="inherit" onClick={() => history.push('/')}>
+          <Icon>
+            <Clear />
+          </Icon>
+        </IconButton>
+      }
+      bottomBarComponent={
+        <div style={{ height: '100%' }}>
+          <Button
+            style={{ height: 'inherit', width: '50%' }}
+            variant="contained"
+            color="primary"
+            disabled
+            onClick={() => {
+              history.push(getSurveyQuestionPath(shareCode));
+            }}
+          >
+            My answer
+          </Button>
+          <Button
+            style={{ height: 'inherit', width: '50%' }}
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              history.push(getSurveyResultsPath(shareCode));
+            }}
+          >
+            Results
+          </Button>
         </div>
-      </Shell>
-    </UserGate>
+      }
+    >
+      <div
+        style={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-evenly',
+        }}
+      >
+        <div style={{ textAlign: 'center' }}>
+          <Typography variant="h4">{currentQuestion.value}</Typography>
+        </div>
+        <FormControl>
+          <FormLabel>Your answer</FormLabel>
+          <RadioGroup
+            aria-label="Your answer"
+            name={`question-${currentQuestion.id}-answers`}
+            value={currentResponse ? currentResponse.answerId : undefined}
+            onChange={async e => {
+              const value = (e.target as HTMLInputElement).value;
+              setSubmission({ submitting: true, value });
+              await submitAnswer({
+                ...currentResponse,
+                questionId: currentQuestion.id,
+                answerId: value,
+              });
+              setSubmission({ submitting: false, value: null });
+            }}
+          >
+            {Object.entries(currentQuestion.possibleAnswers).map(([answerId, answer]) => (
+              <FormControlLabel
+                key={answerId}
+                disabled={submission.submitting}
+                value={answerId}
+                control={
+                  <Radio
+                    checked={currentResponse && answerId === currentResponse.answerId}
+                    icon={
+                      submission.submitting && answerId === submission.value ? (
+                        <CircularProgress size={radioButtonIconSize} />
+                      ) : (
+                        <RadioButtonUnchecked />
+                      )
+                    }
+                  />
+                }
+                label={answer.value}
+              />
+            ))}
+          </RadioGroup>
+        </FormControl>
+      </div>
+    </Shell>
   );
 }

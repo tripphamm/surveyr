@@ -51,7 +51,11 @@ export default function Surveys(props: {
             justifyContent: 'space-evenly',
           }}
         >
-          <Typography variant="display1" style={{ textAlign: 'center' }}>
+          <Typography
+            data-test-id="surveys-page-header"
+            variant="display1"
+            style={{ textAlign: 'center' }}
+          >
             {"Let's get started"}
           </Typography>
           <HowItWorksSteps />

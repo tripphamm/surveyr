@@ -5,16 +5,12 @@ import { NormalizedSurveys, Subscribable, Survey } from '../entities';
 import { normalizeSurvey } from '../utils/normalizationUtil';
 import { logError } from '../utils/errorLogger';
 
-export default function useMySurveys(userId?: string): Subscribable<NormalizedSurveys> {
+export default function useMySurveys(userId: string): Subscribable<NormalizedSurveys> {
   const [mySurveys, setMySurveys] = useState<Subscribable<NormalizedSurveys>>({
     loading: true,
   });
 
   useEffect(() => {
-    if (userId === undefined) {
-      return;
-    }
-
     setMySurveys({
       loading: true,
     });

@@ -19,7 +19,12 @@ import useRouter from '../hooks/useRouter';
 import EmojiIcon from '../components/EmojiIcon';
 import FloatingEditButton from '../components/FloatingEditButton';
 import NotFound from './NotFound';
-import { getSurveyPresenterInfoPath, getEditSurveyPath, getSurveysPath } from '../utils/routeUtil';
+import {
+  getSurveyPresenterInfoPath,
+  getEditSurveyPath,
+  getSurveysPath,
+  getSurveyPresenterPath,
+} from '../utils/routeUtil';
 import { NormalizedSurveys, NormalizedSurveyInstances } from '../entities';
 
 export default function Survey(props: {
@@ -98,7 +103,7 @@ export default function Survey(props: {
               {surveyInstancesForThisSurvey.map((surveyInstance, i) => (
                 <ListItem
                   key={`survey-instance-${i}`}
-                  onClick={() => history.push(getSurveyPresenterInfoPath(surveyInstance.shareCode))}
+                  onClick={() => history.push(getSurveyPresenterPath(surveyInstance.shareCode))}
                 >
                   <ListItemText>{surveyInstance.shareCode}</ListItemText>
                   <ListItemSecondaryAction>

@@ -18,7 +18,7 @@ export default function HowItWorks() {
           variant="contained"
           color="primary"
           onClick={() => {
-            history.push('/');
+            history.goBack();
           }}
         >
           Sounds good

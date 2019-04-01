@@ -12,21 +12,13 @@ import Shell from '../components/Shell';
 import EmojiIcon from '../components/EmojiIcon';
 import useRouter from '../hooks/useRouter';
 import { getJoinSurveyPath } from '../utils/routeUtil';
-import useSession from '../hooks/useSession';
 
 const ui = new firebaseui.auth.AuthUI(auth);
 
 function Auth(props: { theme: Theme }) {
   const { theme } = props;
 
-  const { user } = useSession();
   const { history } = useRouter();
-
-  // if the user is already logged in with an anonymous account,
-  // log them out so that they can log in properly
-  if (user && user.isAnonymous) {
-    auth.signOut();
-  }
 
   useEffect(() => {
     ui.start('#firebaseui-auth-container', {
@@ -80,7 +72,12 @@ function Auth(props: { theme: Theme }) {
           alignItems: 'center',
         }}
       >
-        <Typography style={{ textAlign: 'center' }} variant="display1" gutterBottom>
+        <Typography
+          data-test-id="auth-page-header"
+          style={{ textAlign: 'center' }}
+          variant="display1"
+          gutterBottom
+        >
           Sign in to create your own surveys!
         </Typography>
 

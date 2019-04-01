@@ -13,7 +13,9 @@ import {
 } from '../utils/routeUtil';
 import useSurveyInstanceActions from '../hooks/useSurveyInstanceActions';
 import useSurveyActions from '../hooks/useSurveyActions';
-import useSession from '../hooks/useSession';
+import useUser from '../hooks/useUser';
+import useMySurveys from '../hooks/useMySurveys';
+import useMySurveyInstances from '../hooks/useMySurveyInstances';
 import Loading from '../pages/Loading';
 
 const Surveys = React.lazy(() => import('../pages/Surveys'));
@@ -25,11 +27,12 @@ const PresenterInfo = React.lazy(() => import('../pages/PresenterInfo'));
 const NotFound = React.lazy(() => import('../pages/NotFound'));
 
 export default function HostRoutes() {
-  const { ready, user, surveys: mySurveys, surveyInstances: mySurveyInstances } = useSession();
+  const { user } = useUser();
 
-  if (user === null || user === undefined) {
-    throw new Error('Missing user in HostRoutes');
-  }
+  const { loading: mySurveysLoading, value: mySurveys } = useMySurveys(user.id);
+  const { loading: mySurveyInstancesLoading, value: mySurveyInstances } = useMySurveyInstances(
+    user.id,
+  );
 
   const { match } = useRouter();
 
@@ -41,7 +44,7 @@ export default function HostRoutes() {
     deleteSurveyInstance,
   } = useSurveyInstanceActions(user.id);
 
-  if (!ready) {
+  if (mySurveysLoading || mySurveyInstancesLoading) {
     return <Loading />;
   }
 

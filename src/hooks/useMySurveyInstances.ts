@@ -5,7 +5,7 @@ import { firestore } from '../services/firebaseService';
 import { logError } from '../utils/errorLogger';
 
 export default function useMySurveyInstances(
-  userId?: string,
+  userId: string,
 ): Subscribable<NormalizedSurveyInstances> {
   const [mySurveyInstances, setMySurveyInstances] = useState<
     Subscribable<NormalizedSurveyInstances>
@@ -14,10 +14,6 @@ export default function useMySurveyInstances(
   });
 
   useEffect(() => {
-    if (userId === undefined) {
-      return;
-    }
-
     // todo: should this go before or after the bail-out
     setMySurveyInstances({
       loading: true,
