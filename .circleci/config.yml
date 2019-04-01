@@ -5,7 +5,7 @@ orbs:
 jobs:
   build-and-deploy:
     docker:
-      - image: circleci/node:lts
+      - image: cypress/base:10
     steps:
       - rollbar/notify_deploy_started:
           environment: production
