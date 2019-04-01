@@ -39,16 +39,21 @@
     "react-scripts": "2.1.8",
     "react-spring": "^8.0.18",
     "rollbar": "^2.5.4",
+    "serve": "^10.1.2",
     "source-map-explorer": "^1.8.0",
+    "start-server-and-test": "^1.7.12",
     "typescript": "3.3.3333",
     "uuid": "^3.3.2"
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:ci": "cypress run",
+    "ci": "start-server-and-test serve http://localhost:3000 cypress:ci",
     "start": "react-scripts start",
     "build": "REACT_APP_VERSION=$(git show -s --format=%h) react-scripts build",
-    "test": "react-scripts test",
+    "serve": "serve -s build -l 3000",
     "eject": "react-scripts eject",
     "deploy": "yarn build && firebase deploy"
   },

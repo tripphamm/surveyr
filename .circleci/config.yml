@@ -18,6 +18,7 @@ jobs:
           paths:
             - ./node_modules
       - run: yarn build
+      - run: yarn ci
       - firebase-deploy/deploy:
           token: $FIREBASE_TOKEN
       - rollbar/notify_deploy_finished:
