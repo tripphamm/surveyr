@@ -9,6 +9,10 @@ jobs:
     steps:
       - rollbar/notify_deploy_started:
           environment: production
+      - run:
+          name: Install jq
+          command: |
+            apt-get update && apt-get install jq
       - checkout
       - restore_cache:
           key: v1-yarn-{{ checksum "yarn.lock" }}
